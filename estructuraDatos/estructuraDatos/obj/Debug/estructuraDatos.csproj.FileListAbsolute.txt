@@ -1,0 +1,7 @@
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\bin\Debug\estructuraDatos.exe.config
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\bin\Debug\estructuraDatos.exe
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\bin\Debug\estructuraDatos.pdb
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\obj\Debug\estructuraDatos.csprojAssemblyReference.cache
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\obj\Debug\estructuraDatos.csproj.CoreCompileInputs.cache
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\obj\Debug\estructuraDatos.exe
+C:\Users\labinf\source\repos\estructuraDatos\estructuraDatos\obj\Debug\estructuraDatos.pdb
