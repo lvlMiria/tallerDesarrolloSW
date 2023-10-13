@@ -1,0 +1,6 @@
+C:\Users\labinf\source\repos\ejPOO\consola\bin\Debug\consola.exe.config
+C:\Users\labinf\source\repos\ejPOO\consola\bin\Debug\consola.exe
+C:\Users\labinf\source\repos\ejPOO\consola\bin\Debug\consola.pdb
+C:\Users\labinf\source\repos\ejPOO\consola\obj\Debug\consola.csproj.CoreCompileInputs.cache
+C:\Users\labinf\source\repos\ejPOO\consola\obj\Debug\consola.exe
+C:\Users\labinf\source\repos\ejPOO\consola\obj\Debug\consola.pdb
