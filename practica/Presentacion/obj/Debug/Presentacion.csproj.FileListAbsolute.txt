@@ -1,0 +1,10 @@
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\bin\Debug\Presentacion.exe.config
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\bin\Debug\Presentacion.exe
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\bin\Debug\Presentacion.pdb
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\bin\Debug\Logica.dll
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\bin\Debug\Logica.pdb
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\obj\Debug\Presentacion.csproj.AssemblyReference.cache
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\obj\Debug\Presentacion.csproj.CoreCompileInputs.cache
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\obj\Debug\Presentacion.csproj.CopyComplete
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\obj\Debug\Presentacion.exe
+D:\Mis Documentos\USM\Sede\NET\practica\Presentacion\obj\Debug\Presentacion.pdb

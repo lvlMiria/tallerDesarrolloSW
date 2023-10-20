@@ -1,0 +1,6 @@
+D:\Mis Documentos\USM\Sede\NET\practica\Logica\bin\Debug\Logica.dll
+D:\Mis Documentos\USM\Sede\NET\practica\Logica\bin\Debug\Logica.pdb
+D:\Mis Documentos\USM\Sede\NET\practica\Logica\obj\Debug\Logica.csproj.AssemblyReference.cache
+D:\Mis Documentos\USM\Sede\NET\practica\Logica\obj\Debug\Logica.csproj.CoreCompileInputs.cache
+D:\Mis Documentos\USM\Sede\NET\practica\Logica\obj\Debug\Logica.dll
+D:\Mis Documentos\USM\Sede\NET\practica\Logica\obj\Debug\Logica.pdb
