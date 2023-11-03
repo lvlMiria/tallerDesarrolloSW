@@ -1,0 +1,25 @@
+﻿<Window x:Class="PresentacionWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PresentacionWPF"
+        mc:Ignorable="d"
+        Title="Demo WPF" Height="500" Width="850" Background="#d6ecff" FontWeight="bold">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Background="#3073af">
+            <TextBlock Text="Mis Contactos" FontSize="24" Foreground="White" Padding="5,2,0,0"/>
+            <Button Name="BtnInicio" Content="Inicio" Foreground="White" Width="200" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center" HorizontalContentAlignment="Left" Padding="15,0,0,0" Background="Transparent" BorderThickness="0" FontWeight="Normal"/>
+            <Button Name="BtnNuevo" Content="Nuevo Contacto" Foreground="White" Width="200" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center" HorizontalContentAlignment="Left" Padding="15,0,0,0"  Background="Transparent" BorderThickness="0" FontWeight="Normal" Click="BtnNuevo_Click"/>
+        </StackPanel>
+
+        <Grid x:Name="GrdMain" Grid.Column="1">
+            <TextBlock Text="Contactos" Padding="10,5,0,0" FontSize="22" Foreground="#223760" FontWeight="Bold"/>
+        </Grid>
+    </Grid>
+</Window>
