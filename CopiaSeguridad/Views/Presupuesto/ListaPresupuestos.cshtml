@@ -1,0 +1,107 @@
+﻿@{
+    ViewData["Title"] = "Lista de Facturas";
+}
+
+<div class="row mb-3">
+    <div class="col-8">
+        <div class="row p-2">
+            @*Combos*@
+            <div class="col">
+                <label for="cboAnio" class="form-label" style="font-weight:bold">Año</label>
+                <div class="input-group mb-3">
+                    <select class="form-select" aria-label="cboAnio">
+                        <option selected>Seleccionar</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <label for="cboMes" class="form-label" style="font-weight:bold">Mes</label>
+                <div class="input-group mb-3">
+                    <select class="form-select" aria-label="cboMes">
+                        <option selected>Seleccionar</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <div class="col-4">
+        @*Botones*@
+        <div class="row ms-auto p-2">
+            <div class="col">
+                <div class="m-2">
+                    <div class="d-grid gap-2">
+                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Exportar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="m-2">
+                    <a asp-action="Index">
+                        <div class="d-grid gap-2">
+                            <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Volver</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container m-2" style="background-color:white">
+    <div class="tabla-scroll">
+        <table class="table table-striped table-hover" style="overflow-x:scroll">
+            <thead>
+                <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Concepto</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Presupuesto anual</th>
+                    <th scope="col">Gasto real</th>
+                    <th scope="col">Diferencia</th>
+                    <th scope="col">Enero</th>
+                    <th scope="col">Febrero</th>
+                    <th scope="col">Marzo</th>
+                    <th scope="col">Abril</th>
+                    <th scope="col">Mayo</th>
+                    <th scope="col">Junio</th>
+                    <th scope="col">Julio</th>
+                    <th scope="col">Agosto</th>
+                    <th scope="col">Septiembre</th>
+                    <th scope="col">Octubre</th>
+                    <th scope="col">Noviembre</th>
+                    <th scope="col">Diciembre</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Impresoras</td>
+                    <td>Servicio</td>
+                    <td>Gasto</td>
+                    <td>600</td>
+                    <td>500</td>
+                    <td>x%</td>
+                    <td>150</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>150</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>150</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>150</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>

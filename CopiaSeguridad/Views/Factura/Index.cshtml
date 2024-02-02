@@ -1,0 +1,146 @@
+﻿@{
+    ViewData["Title"] = "Facturas";
+}
+
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="d-flex flex-row-reverse">
+        <a asp-action="ListaFacturas">
+            Ver Lista <span class="material-icons">arrow_circle_right</span>
+        </a>
+    </div>
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Facturas</h3>
+        </div>
+    </div>
+
+    <div class="container-fluid d-flex flex-column justify-content-center">
+
+        <div class="row m-1">
+            @*Item*@
+            <label for="cboItems" class="form-label">Item</label>
+            <div class="input-group mb-3">
+                <select class="form-select" aria-label="cboItems">
+                    <option selected>Seleccionar</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+        </div>
+
+        @*N°Factura*@
+        <div class="row m-1">
+            <label for="nFactura" class="form-label">N°Factura</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" aria-label="nFactura">
+                <button class="btn btn-outline-secondary" type="button" id="button-addon2"><span class="material-icons">search</span></button>
+            </div>
+        </div>
+
+        @*Monto*@
+        <div class="row m-1">
+            <label for="txtMonto" class="form-label">Monto</label>
+            <div class="input-group mb-3">
+                <span class="input-group-text">$</span>
+                <input type="text" class="form-control" aria-label="txtMonto">
+            </div>
+        </div>
+
+        <div class="row m-1">
+            @*Empresa*@
+            <label for="cboEmpresa" class="form-label">Empresa</label>
+            <div class="input-group mb-3">
+                <select class="form-select" aria-label="cboEmpresa">
+                    <option selected>Seleccionar</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row m-3">
+            <label for="dtRecepcion">Fecha de Recepción</label>
+            <input id="dtRecepcion" class="form-control" type="date" />
+        </div>
+
+        <div class="row m-3">
+            <label for="dtEntrega">Fecha de Entrega</label>
+            <input id="dtEntrega" class="form-control" type="date" />
+        </div>
+
+        @*Mes y año contable*@
+        <div class="row m-1">
+            <div class="col-6">
+                <label for="txtMes">Mes Contable</label>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" aria-label="txtMes">
+                </div>
+            </div>
+            <div class="col-6">
+                <label for="txtAnio">Año Contable</label>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" aria-label="txtAnio">
+                </div>
+            </div>
+        </div>
+
+        @*SIT o Contrato*@
+        <div class="row m-2">
+            <p>Origen</p>
+            <div class="col-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbContrato">
+                    <label class="form-check-label" for="rdbContrato">
+                        Contrato
+                    </label>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbSIT">
+                    <label class="form-check-label" for="rdbSIT">
+                        SIT
+                    </label>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" aria-label="txtSIT">
+                </div>
+            </div>
+        </div>
+
+        @*Botones*@
+        <div class="row" style="margin-top:40px">
+
+            <div class="col-12 col-md-4">
+                <div class="m-2">
+                    <a asp-action="Index" asp-controller="Home">
+                        <div class="d-grid gap-2">
+                            <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="m-2">
+                    <div class="d-grid gap-2">
+                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="m-2">
+                    <div class="d-grid gap-2">
+                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
