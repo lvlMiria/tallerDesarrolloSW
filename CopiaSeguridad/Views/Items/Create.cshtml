@@ -1,0 +1,189 @@
+﻿@model Presentacion.Models.Item
+
+@{
+    ViewData["Title"] = "Nuevo item";
+}
+
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Items</h3>
+        </div>
+    </div>
+
+    <div class="container-fluid d-flex flex-column justify-content-center" style="width:800px">
+        <form asp-action="Create">
+            @*Item*@
+            <div class="row m-2">
+                <label for="nombre_item" class="form-label">Item</label>
+                <div class="input-group mb-3">
+                    <input asp-for="DescItem" type="text" class="form-control" placeholder="Nombre del item" aria-label="nombre_item">
+                </div>
+            </div>
+
+            @*Concepto*@
+            <div class="row m-2">
+                <label for="cboConcepto" class="form-label">Concepto</label>
+                <div class="input-group mb-3">
+                    <select asp-for="CodConcepto" class="form-select" aria-label="cboConcepto">
+                        <option selected>Seleccionar concepto</option>
+                        @foreach (var concepto in ViewBag.Conceptos)
+                        {
+                            <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            @*Gasto o inversión*@
+            <div class="row m-2">
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">Tipo</div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input asp-for="GastoInversion" value="gasto" class="form-check-input" type="radio" name="rdbGastoInv" id="rdbGasto">
+                                <label class="form-check-label" for="rdbGasto">
+                                    Gasto
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="GastoInversion" value="inversión" class="form-check-input" type="radio" name="rdbGastoInv" id="rdbInversion">
+                                <label class="form-check-label" for="rdbInversion">
+                                    Inversión
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    @*Continuidad o nuevo*@
+                    <div class="card">
+                        <div class="card-header">Clasificación</div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input asp-for="ContNuevo" value="continuidad operacional" class="form-check-input" type="radio" name="rdbContNuevo" id="rdbContinuidad">
+                                <label class="form-check-label" for="rdbContinuidad">
+                                    Continuidad Operativa
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="ContNuevo" value="nuevo proyecto" class="form-check-input" type="radio" name="rdbContNuevo" id="rdbNuevo">
+                                <label class="form-check-label" for="rdbNuevo">
+                                    Nuevo Proyecto
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*Estado*@
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">Estado</div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input asp-for="Estado" value="1" class="form-check-input" type="radio" name="rdbEstado" id="rdbActivo">
+                                <label class="form-check-label" for="rdbActivo">
+                                    Activo
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="Estado" value="0" class="form-check-input" type="radio" name="rdbEstado" id="rdbInactivo">
+                                <label class="form-check-label" for="rdbInactivo">
+                                    Inactivo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            @*Botones*@
+            <div class="row" style="margin-top:40px">
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <a asp-action="Index" asp-controller="Home">
+                            <div class="d-grid gap-2">
+                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <a asp-action="Index">
+                            <div class="d-grid gap-2">
+                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Editar</button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <div class="d-grid gap-2">
+                            <button type="submit" value="Create" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+</div>
+
+@* =============== Original ==================
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="CodItem" class="control-label"></label>
+                <input asp-for="CodItem" class="form-control" />
+                <span asp-validation-for="CodItem" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DescItem" class="control-label"></label>
+                <input asp-for="DescItem" class="form-control" />
+                <span asp-validation-for="DescItem" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GastoInversion" class="control-label"></label>
+                <input asp-for="GastoInversion" class="form-control" />
+                <span asp-validation-for="GastoInversion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ContNuevo" class="control-label"></label>
+                <input asp-for="ContNuevo" class="form-control" />
+                <span asp-validation-for="ContNuevo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CodConcepto" class="control-label"></label>
+                <select asp-for="CodConcepto" class ="form-control" asp-items="ViewBag.CodConcepto"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Estado" class="control-label"></label>
+                <input asp-for="Estado" class="form-control" />
+                <span asp-validation-for="Estado" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+ *@

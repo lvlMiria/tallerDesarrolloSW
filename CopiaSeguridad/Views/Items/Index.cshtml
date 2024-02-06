@@ -1,0 +1,257 @@
+﻿@model IEnumerable<Presentacion.Models.Item>
+
+@{
+    ViewData["Title"] = "Items";
+}
+
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Items</h3>
+        </div>
+    </div>
+
+    <div class="container-fluid d-flex flex-column justify-content-center" style="width:800px">
+        <form>
+            @*Item*@
+            <div class="row m-2">
+                <label for="nombre_item" class="form-label">Item</label>
+                <div class="input-group mb-3">
+                    <button class="btn btn-outline-secondary" type="button" id="btnAtras">
+                        <span class="material-icons">arrow_back_ios</span>
+                    </button>
+                    <input type="text" value="@ViewBag.PrimerItem.DescItem" class="form-control" aria-label="nombre_item">
+                    <button class="btn btn-outline-secondary" type="button" id="btnAdelante">
+                        <span class="material-icons">arrow_forward_ios</span>
+                    </button>
+                </div>
+            </div>
+
+            @*Concepto*@
+            <div class="row m-2">
+                <label for="cboConcepto" class="form-label">Concepto</label>
+                <div class="input-group mb-3">
+                    <select class="form-select" id="cmbConcepto">
+                        @foreach(var concepto in ViewBag.Conceptos)
+                        { 
+                            <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                        }
+                    </select>
+                    @section scripts{
+                        <script>
+                            //Combobox Concepto del primer item
+                            var primerCodConcepto = '@ViewBag.PrimerItem.CodConcepto';
+                            var select = document.getElementById('cmbConcepto');
+                            for (var i = 0; i < select.options.length; i++) {
+                                if (select.options[i].value === primerCodConcepto) {
+                                    select.options[i].selected = true;
+                                }
+                                
+                            }
+                        </script>
+                        
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                        <script>
+                            //Botones atras y siguiente textbox AUN NO FUNCIONAN
+                            //siguiente
+                            $(document).ready(function () {
+                                $('#btnAdelante').click(function () {
+                                    var codActual = $('#nombre_item').val();
+                                    $.ajax({
+                                        type: 'GET',
+                                        url: '/ItemsController/RegistroSiguiente',
+                                        data: { codActual: codActual },
+                                        success: function (registroSiguiente) {
+                                            $('#nombre_item').val(registroSiguiente.DescItem);
+                                            $('#cmbConcepto').val(registroSiguiente.CodConcepto);
+                                            $('input[name="estado"]').prop('checked', false);
+                                            $('#rdbActivo').prop('checked', registroSiguiente.estado === 1);
+                                            $('#rdbInactivo').prop('checked', registroSiguiente.estado === 0);
+                                        },
+                                        error: function () {
+                                            alert('Error al obtener el registro siguiente');
+                                        }
+                                    });
+                                });
+                            });
+                            //atras
+                            $(document).ready(function () {
+                                $('#btnAnterior').click(function () {
+                                    var codActual = $('#nombre_item').val();
+                                    $.ajax({
+                                        type: 'GET',
+                                        url: '/ItemsController/RegistroAnterior',
+                                        data: { codActual: codActual },
+                                        success: function (registroAnterior) {
+                                            $('#nombre_item').val(registroAnterior.DescItem);
+                                            $('#cmbConcepto').val(registroAnterior.CodConcepto);
+                                            $('input[name="estado"]').prop('checked', false);
+                                            $('#rdbActivo').prop('checked', registroAnterior.estado === 1);
+                                            $('#rdbInactivo').prop('checked', registroAnterior.estado === 0);
+                                        },
+                                        error: function () {
+                                            alert('Error al obtener el registro anterior');
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
+                    }
+                </div>
+            </div>
+
+            @*Gasto o inversión*@
+            <div class="row m-2">
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">Tipo</div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input value="gasto" class="form-check-input" type="radio" name="rdbGastoInv" id="rdbGasto" @(ViewBag.PrimerItem.GastoInversion == "gasto" ? "checked" : "")/>
+                                <label class="form-check-label" for="rdbGasto">
+                                    Gasto
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input value="inversión" class="form-check-input" type="radio" name="rdbGastoInv" id="rdbInversion" @(ViewBag.PrimerItem.GastoInversion == "inversion" ? "checked" : "") />
+                                <label class="form-check-label" for="rdbInversion">
+                                    Inversión
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    @*Continuidad o nuevo*@
+                    <div class="card">
+                        <div class="card-header">Clasificación</div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input value="continuidad operativa" class="form-check-input" type="radio" name="rdbContNuevo" id="rdbContinuidad" @(ViewBag.PrimerItem.ContNuevo == "continuidad operativa" ? "checked" : "") />
+                                <label class="form-check-label" for="rdbContinuidad">
+                                    Continuidad Operativa
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input value="nuevo proyecto" class="form-check-input" type="radio" name="rdbContNuevo" id="rdbNuevo" @(ViewBag.PrimerItem.ContNuevo == "nuevo proyecto" ? "checked" : "") />
+                                <label class="form-check-label" for="rdbNuevo">
+                                    Nuevo Proyecto
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*Estado*@
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">Estado</div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input value="1" class="form-check-input" type="radio" name="rdbEstado" id="rdbActivo" @(ViewBag.PrimerItem.Estado == 1 ? "checked" : "") />
+                                <label class="form-check-label" for="rdbActivo">
+                                    Activo
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input value="0" class="form-check-input" type="radio" name="rdbEstado" id="rdbInactivo" @(ViewBag.PrimerItem.Estado == 0 ? "checked" : "") />
+                                <label class="form-check-label" for="rdbInactivo">
+                                    Inactivo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            @*Botones*@
+            <div class="row" style="margin-top:40px">
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <a asp-action="Index" asp-controller="Home">
+                            <div class="d-grid gap-2">
+                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <a asp-action="Create">
+                            <div class="d-grid gap-2">
+                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <div class="d-grid gap-2">
+                            <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+</div>
+
+@* ============= Original ==============
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DescItem)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GastoInversion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ContNuevo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Estado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CodConceptoNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.DescItem)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GastoInversion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ContNuevo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Estado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CodConceptoNavigation.CodConcepto)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.CodItem">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.CodItem">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.CodItem">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+*@

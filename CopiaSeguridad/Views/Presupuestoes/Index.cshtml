@@ -1,0 +1,193 @@
+﻿@model IEnumerable<Presentacion.Models.Presupuesto>
+
+@{
+    ViewData["Title"] = "Presupuestos";
+}
+
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="d-flex flex-row-reverse">
+        <a asp-action="ListaPresupuestos">
+            Ver Lista <span class="material-icons">arrow_circle_right</span>
+        </a>
+    </div>
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Presupuestos</h3>
+        </div>
+    </div>
+
+    <div class="container flex-column justify-content-center" style="width:800px">
+
+        <div class="row m-2">
+            @*Item*@
+            <div class="col-6">
+                <label for="cboItems" class="form-label">Item</label>
+                <div class="input-group mb-3">
+                    <select class="form-select" aria-label="cboItems">
+                        <option selected>Seleccionar item</option>
+                        @foreach(var item in ViewBag.Items)
+                        {
+                            @if (item.Estado == 1)
+                            {
+                                <option value="@item.CodItem">@item.DescItem</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            @*Concepto*@
+            <div class="col-6">
+                <div class="row m-4">
+                </div>
+                <div class="row">
+                    <p>Concepto: [Inserte Concepto]</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row m-2">
+            @*Continuidad o Nuevo*@
+            <div class="col-6">
+                <p>Clasificación: [Inserte Clasificación]</p>
+            </div>
+            @*Gasto o inversión*@
+            <div class="col-6">
+                <p>Tipo: [Inserte Tipo]</p>
+            </div>
+        </div>
+
+        <div class="row m-2">
+            <p style="font-weight:bold">IPC año anterior: [IPC%]</p>
+        </div>
+
+        <div class="row m-2">
+            <div class="col-2">
+                <p style="font-weight:bold">Mes</p>
+            </div>
+            <div class="col-3">
+                <p style="font-weight:bold">Presupuesto</p>
+            </div>
+            <div class="col-3">
+                <p style="font-weight:bold">Gasto real</p>
+            </div>
+            <div class="col-4">
+                <p style="font-weight:bold">Gasto real año pasado</p>
+            </div>
+        </div>
+
+        @for (int i = 1; i < 13; i++)
+        {
+            <div class="row m-2">
+                <div class="col-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="{{i}}" id="chkMes">
+                        @*Hacer arreglo de meses e ir mostrando respecto al índice*@
+                        @if (i == 1)
+                        {
+                            <label class="form-check-label" for="chkMes">Enero</label>
+                        }
+                    </div>
+                </div>
+
+                @*Presupuesto mensual*@
+                <div class="col-3">
+                    <input class="form-control" type="text" placeholder="Monto en pesos chilenos" aria-label="txtPresupuesto">
+                </div>
+
+                @*Gasto real (acumulado)*@
+                <div class="col-3">
+                    <input class="form-control" type="text" value="" aria-label="txtGastoReal" disabled readonly>
+                </div>
+                @*Gasto real año anterior*@
+                <div class="col-4">
+                    <input class="form-control" type="text" value="" aria-label="txtGastoAnterior" disabled readonly>
+                </div>
+            </div>
+        }
+
+        <div class="row m-2">
+            <label for="txtAnioAnterior" class="form-label">Anual</label>
+            <input class="form-control" type="text" value="" aria-label="txtAnioAnterior" disabled readonly>
+        </div>
+
+        @*Botones*@
+        <div class="row" style="margin-top:40px">
+
+            <div class="col-12 col-md-4">
+                <div class="m-2">
+                    <a asp-action="Index" asp-controller="Home">
+                        <div class="d-grid gap-2">
+                            <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="m-2">
+                    <div class="d-grid gap-2">
+                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="m-2">
+                    <div class="d-grid gap-2">
+                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@*=================== Original ====================== 
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Mes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PresupuestoMes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AnioNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CodItemNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Mes)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PresupuestoMes)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AnioNavigation.Anio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CodItemNavigation.CodItem)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.CodPresupuesto">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.CodPresupuesto">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.CodPresupuesto">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table> *@
