@@ -1,13 +1,91 @@
 ﻿@model Presentacion.Models.TipoCambio
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nuevo valor Dolar";
 }
 
-<h1>Create</h1>
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Valor USD</h3>
+        </div>
+    </div>
 
-<h4>TipoCambio</h4>
-<hr />
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="card" style="width: 30rem;border-color:forestgreen">
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @*Valor*@
+                    <div class="row m-1 form-group">
+                        <label for="txtValor" class="form-label">Valor</label>
+                        <div class="input-group mb-3">
+                            <input asp-for="Valor" type="text" class="form-control" aria-label="txtValor">
+                            <span asp-validation-for="Valor" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    @*Mes*@
+                    <div class="row m-1 form-group">
+                        <label for="txtMes" class="form-label">Mes</label>
+                        <div class="input-group mb-3">
+                            <input asp-for="Mes" type="text" class="form-control" aria-label="txtMes">
+                            <span asp-validation-for="Mes" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    @*año*@
+                    <div class="row m-1 form-group">
+                        <label for="txtAnio" class="form-label">Año</label>
+                        <div class="input-group mb-3">
+                            <input asp-for="Anio" type="text" class="form-control" aria-label="txtAnio">
+                            <span asp-validation-for="Anio" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @*Botones*@
+                    <div class="row form-group" style="margin-top:40px">
+
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <a asp-action="Index">
+                                    <div class="d-grid gap-2">
+                                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Volver</button>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        @* <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <div class="d-grid gap-2">
+                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
+                                </div>
+                            </div>
+                        </div> *@
+
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <div class="d-grid gap-2">
+                                    <input type="submit" value="Ingresar" style=" background-color: forestgreen; color: white;" class="btn"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+@* 
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
@@ -40,4 +118,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+} *@

@@ -57,6 +57,7 @@
                             $(document).ready(function () {
                                 $('#btnAdelante').click(function () {
                                     var codActual = $('#nombre_item').val();
+                                    console.log(codActual);
                                     $.ajax({
                                         type: 'GET',
                                         url: '/ItemsController/RegistroSiguiente',

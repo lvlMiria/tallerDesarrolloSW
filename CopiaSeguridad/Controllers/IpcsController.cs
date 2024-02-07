@@ -12,7 +12,6 @@ namespace Presentacion.Controllers
     public class IpcsController : Controller
     {
         private readonly SistPresupuestosContext _context;
-
         public IpcsController(SistPresupuestosContext context)
         {
             _context = context;
@@ -21,8 +20,13 @@ namespace Presentacion.Controllers
         // GET: Ipcs
         public async Task<IActionResult> Index()
         {
-              return _context.Ipcs != null ? 
-                          View(await _context.Ipcs.ToListAsync()) :
+            //Primer item de la tabla
+            ViewBag.PrimerItem = _context.Ipcs
+                .OrderByDescending(tc => tc.Anio)
+                .FirstOrDefault();
+
+            return _context.Ipcs != null ? 
+                          View(await _context.Ipcs.OrderByDescending(tc => tc.Anio).ToListAsync()) :
                           Problem("Entity set 'SistPresupuestosContext.Ipcs'  is null.");
         }
 
@@ -89,6 +93,7 @@ namespace Presentacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(short id, [Bind("Anio,Valor")] Ipc ipc)
         {
+
             if (id != ipc.Anio)
             {
                 return NotFound();

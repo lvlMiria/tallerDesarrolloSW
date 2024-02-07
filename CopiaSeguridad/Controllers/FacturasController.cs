@@ -21,9 +21,22 @@ namespace Presentacion.Controllers
         // GET: Facturas
         public async Task<IActionResult> Index()
         {
-            var sistPresupuestosContext = _context.Facturas.Include(f => f.TipoCambio);
-            List<Item> items = await _context.Items.ToListAsync();
+            var sistPresupuestosContext = _context.Facturas
+                .Include(f => f.TipoCambio);
+            
+            var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
+
+            //Primer item de la tabla
+            var primerItemF = _context.Facturas.FirstOrDefault();
+            ViewBag.PrimerItemF = primerItemF;
+
+            var primerItemCF = await _context.ControlFacturas.FirstOrDefaultAsync(cf => cf.CodFactura == primerItemF.CodFactura);
+            ViewBag.PrimerItemCF = primerItemCF;
+
+            var primerItemP = await _context.Presupuestos.FirstOrDefaultAsync(p => p.CodPresupuesto == primerItemCF.CodPresupuesto);
+            ViewBag.PrimerItemP = primerItemP;
+
             return View(await sistPresupuestosContext.ToListAsync());
         }
 
@@ -58,6 +71,9 @@ namespace Presentacion.Controllers
         // GET: Facturas/Create
         public IActionResult Create()
         {
+            var items = _context.Items.ToList();
+            ViewBag.Items = items;
+
             ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes");
             return View();
         }

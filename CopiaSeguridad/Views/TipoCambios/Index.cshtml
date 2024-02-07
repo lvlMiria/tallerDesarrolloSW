@@ -19,21 +19,21 @@
                     <div class="row m-1 form-group">
                         <label for="txtValor" class="form-label">Valor</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" aria-label="txtValor">
+                            <input type="text" placeholder="@ViewBag.PrimerItem.Valor" class="form-control" aria-label="txtValor">
                         </div>
                     </div>
                     @*Mes*@
                     <div class="row m-1 form-group">
                         <label for="txtMes" class="form-label">Mes</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" aria-label="txtMes">
+                            <input type="text" placeholder="@ViewBag.PrimerItem.Mes" class="form-control" aria-label="txtMes" id="txtMes">
                         </div>
                     </div>
                     @*año*@
                     <div class="row m-1 form-group">
                         <label for="txtAnio" class="form-label">Año</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" aria-label="txtAnio">
+                            <input type="text" placeholder="@ViewBag.PrimerItem.Anio" class="form-control" aria-label="txtAnio" id="txtAnio">
                         </div>
                     </div>
                     @*Botones*@
@@ -49,19 +49,23 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        @* <div class="col-12 col-md-4">
                             <div class="m-2">
+                                <a asp-action="Edit">
                                 <div class="d-grid gap-2">
                                     <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
                                 </div>
+                                </a>
                             </div>
-                        </div>
+                        </div> *@
 
                         <div class="col-12 col-md-4">
                             <div class="m-2">
+                                <a asp-action="Create">
                                 <div class="d-grid gap-2">
-                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Ingresar</button>
+                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo valor</button>
                                 </div>
+                                </a>
                             </div>
                         </div>
 
@@ -77,14 +81,10 @@
         <div class="row m-1">
             <p style="font-weight:bold">Histórico</p>
         </div>
-        <div class="col">
             @foreach(var item in Model)
             {
-                <p>
-                    @Html.DisplayFor(modelItem => item.Mes)/@Html.DisplayFor(modelItem => item.Anio): $@Html.DisplayFor(modelItem => item.Valor)
-                </p>
+            <p>@Html.DisplayFor(modelItem => item.Mes)/@Html.DisplayFor(modelItem => item.Anio): $@Html.DisplayFor(modelItem => item.Valor) | @Html.ActionLink("Actualizar", "Edit", new { mes = item.Mes, anio = item.Anio })</p>
             }
-        </div>
     </div>
 
 </div>

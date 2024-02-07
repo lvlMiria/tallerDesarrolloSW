@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Presentacion.Models;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,15 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SistPresupuestosContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion")));
+
+//var infoCultura = new CultureInfo("es-ES");
+//infoCultura.NumberFormat.NumberDecimalSeparator = ",";
+//builder.Services.Configure<RequestLocalizationOptions>(options =>
+//{
+//    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(infoCultura);
+//    options.SupportedCultures = new List<CultureInfo> { infoCultura };
+//    options.SupportedUICultures = new List<CultureInfo> { infoCultura };
+//});
 
 var app = builder.Build();
 

@@ -4,11 +4,73 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Valor IPC</h3>
+        </div>
+    </div>
 
-<h4>Ipc</h4>
-<hr />
-<div class="row">
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="card" style="width: 30rem;border-color:forestgreen">
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @*Valor*@
+                    <div class="row m-1">
+                        <label for="txtValor" class="form-label">Valor (Separador decimal con punto)</label>
+                        <div class="input-group mb-3">
+                            <input asp-for="Valor" type="text" class="form-control" aria-label="txtValor">
+                            <span asp-validation-for="Anio" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @*Año*@
+                    <div class="row m-1">
+                        <label for="txtAnio" class="form-label">Año</label>
+                        <div class="input-group mb-3">
+                            <input asp-for="Anio" type="text" class="form-control" aria-label="txtAnio">
+                            <span asp-validation-for="Anio" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @*Botones*@
+                    <div class="row" style="margin-top:40px">
+
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <a asp-action="Index">
+                                    <div class="d-grid gap-2">
+                                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Volver</button>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        @* <div class="col-12 col-md-4">
+                        <div class="m-2">
+                        <div class="d-grid gap-2">
+                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
+                        </div>
+                        </div>
+                        </div> *@
+
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" style=" background-color: forestgreen; color: white;" class="btn">Ingresar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@* <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -32,7 +94,7 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
-
+ *@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

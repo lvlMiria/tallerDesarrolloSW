@@ -18,14 +18,14 @@
                 <div class="row m-1">
                     <label for="txtValor" class="form-label">Valor</label>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" aria-label="txtValor">
+                        <input type="text" placeholder="@ViewBag.PrimerItem.Valor" class="form-control" aria-label="txtValor">
                     </div>
                 </div>
-                @*año*@
+                @*Año*@
                 <div class="row m-1">
                     <label for="txtAnio" class="form-label">Año</label>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" aria-label="txtAnio">
+                        <input type="text" placeholder="@ViewBag.PrimerItem.Anio" class="form-control" aria-label="txtAnio">
                     </div>
                 </div>
                 @*Botones*@
@@ -41,19 +41,21 @@
                         </div>
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    @* <div class="col-12 col-md-4">
                         <div class="m-2">
                             <div class="d-grid gap-2">
                                 <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
                             </div>
                         </div>
-                    </div>
+                    </div> *@
 
                     <div class="col-12 col-md-4">
                         <div class="m-2">
-                            <div class="d-grid gap-2">
-                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Ingresar</button>
-                            </div>
+                            <a asp-action="Create">
+                                <div class="d-grid gap-2">
+                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                                </div>
+                            </a>
                         </div>
                     </div>
 
@@ -72,7 +74,7 @@
             @foreach (var item in Model)
             {
                 <p>
-                    @Html.DisplayFor(modelItem => item.Anio): @Html.DisplayFor(modelItem => item.Valor)%
+                    @Html.DisplayFor(modelItem => item.Anio): @Html.DisplayFor(modelItem => item.Valor)% | @Html.ActionLink("Actualizar", "Edit", new {id = item.Anio })
                 </p>
             }
         </div>

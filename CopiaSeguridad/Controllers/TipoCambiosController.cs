@@ -21,9 +21,17 @@ namespace Presentacion.Controllers
         // GET: TipoCambios
         public async Task<IActionResult> Index()
         {
-              return _context.TipoCambios != null ? 
-                          View(await _context.TipoCambios.ToListAsync()) :
-                          Problem("Entity set 'SistPresupuestosContext.TipoCambios'  is null.");
+            //Primer item de la tabla
+            ViewBag.PrimerItem = _context.TipoCambios
+                .OrderByDescending(tc => tc.Anio)
+                .ThenByDescending(tc => tc.Mes)
+                .FirstOrDefault();
+
+            return _context.TipoCambios != null ? 
+                          View(await _context.TipoCambios
+                            .OrderByDescending(tc => tc.Anio)
+                            .ThenByDescending(tc => tc.Mes)
+                            .ToListAsync()) : Problem("Entity set 'SistPresupuestosContext.TipoCambios'  is null.");
         }
 
         // GET: TipoCambios/Details/5
@@ -67,14 +75,15 @@ namespace Presentacion.Controllers
         }
 
         // GET: TipoCambios/Edit/5
-        public async Task<IActionResult> Edit(byte? id)
+
+        public async Task<IActionResult> Edit(byte? mes,Int16? anio)
         {
-            if (id == null || _context.TipoCambios == null)
+            if (mes == null || anio == null || _context.TipoCambios == null)
             {
                 return NotFound();
             }
 
-            var tipoCambio = await _context.TipoCambios.FindAsync(id);
+            var tipoCambio = await _context.TipoCambios.FindAsync(mes,anio);
             if (tipoCambio == null)
             {
                 return NotFound();
@@ -87,9 +96,9 @@ namespace Presentacion.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(byte id, [Bind("Mes,Anio,Valor")] TipoCambio tipoCambio)
+        public async Task<IActionResult> Edit(byte mes,Int16 anio, [Bind("Mes,Anio,Valor")] TipoCambio tipoCambio)
         {
-            if (id != tipoCambio.Mes)
+            if (mes != tipoCambio.Mes || anio != tipoCambio.Anio)
             {
                 return NotFound();
             }

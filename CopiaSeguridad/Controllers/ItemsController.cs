@@ -12,10 +12,12 @@ namespace Presentacion.Controllers
     public class ItemsController : Controller
     {
         private readonly SistPresupuestosContext _context;
+        private readonly ILogger<IpcsController> _logger;
 
-        public ItemsController(SistPresupuestosContext context)
+        public ItemsController(SistPresupuestosContext context, ILogger<IpcsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Items
@@ -43,6 +45,7 @@ namespace Presentacion.Controllers
         {
             var registroSiguiente = _context.Items.OrderBy(i => i.CodItem)
                 .FirstOrDefault(i => int.Parse(i.CodItem) > int.Parse(codActual));
+            _logger.LogInformation("============="+registroSiguiente);
 
             return Json(registroSiguiente);
         }
