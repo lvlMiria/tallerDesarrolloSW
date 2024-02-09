@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Presentacion.Models;
 
 namespace Presentacion.Controllers
@@ -12,17 +14,21 @@ namespace Presentacion.Controllers
     public class TipoCambiosController : Controller
     {
         private readonly SistPresupuestosContext _context;
+        private readonly ILogger<TipoCambiosController> _logger;
 
-        public TipoCambiosController(SistPresupuestosContext context)
+        public TipoCambiosController(SistPresupuestosContext context, ILogger<TipoCambiosController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: TipoCambios
         public async Task<IActionResult> Index()
         {
+            ViewBag.Error = "";
+
             //Primer item de la tabla
-            ViewBag.PrimerItem = _context.TipoCambios
+            ViewBag.Mostrar = _context.TipoCambios
                 .OrderByDescending(tc => tc.Anio)
                 .ThenByDescending(tc => tc.Mes)
                 .FirstOrDefault();
@@ -32,6 +38,40 @@ namespace Presentacion.Controllers
                             .OrderByDescending(tc => tc.Anio)
                             .ThenByDescending(tc => tc.Mes)
                             .ToListAsync()) : Problem("Entity set 'SistPresupuestosContext.TipoCambios'  is null.");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ObtenerValor(string txtMes, string txtAnio)
+        {
+            ViewBag.Error = "";
+
+            if (txtMes.IsNullOrEmpty() || txtAnio.IsNullOrEmpty())
+            {
+                ViewBag.Mostrar = _context.TipoCambios
+                .OrderByDescending(tc => tc.Anio)
+                .ThenByDescending(tc => tc.Mes)
+                .FirstOrDefault();
+
+                ViewBag.Error = "Ingrese un mes y año por favor.";
+                return View("Index");
+            }
+
+            byte mes = byte.Parse(txtMes);
+            Int16 anio = Int16.Parse(txtAnio);
+            if (_context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anio).FirstOrDefault() == null)
+            {
+                ViewBag.Mostrar = _context.TipoCambios
+                .OrderByDescending(tc => tc.Anio)
+                .ThenByDescending(tc => tc.Mes)
+                .FirstOrDefault();
+
+                ViewBag.Error = "Combinación de mes y año no ingresada en la base de datos.";
+                return View("Index");
+            }
+
+            ViewBag.Mostrar = _context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anio).FirstOrDefault();
+            return View("Index");
+
         }
 
         // GET: TipoCambios/Details/5

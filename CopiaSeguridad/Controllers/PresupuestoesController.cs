@@ -22,19 +22,30 @@ namespace Presentacion.Controllers
         public async Task<IActionResult> Index()
         {
             var sistPresupuestosContext = _context.Presupuestos.Include(p => p.AnioNavigation).Include(p => p.CodItemNavigation);
-            List<Item> items = await _context.Items.ToListAsync();
+            var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
-            return View(await sistPresupuestosContext.ToListAsync());
+
+            var control = await _context.ControlFacturas.ToListAsync();
+            ViewBag.Control = control;
+
+            var facturas = await _context.Facturas.ToListAsync();
+            ViewBag.Facturas = facturas;
+
+            int mesActual = DateTime.Now.Month;
+
+            return View(await sistPresupuestosContext.Include(p => p.Mes == mesActual).ToListAsync());
         }
 
         // GET: Lista de Presupuestos
         public async Task<IActionResult> ListaPresupuestos()
         {
             var sistPresupuestosContext = _context.Presupuestos.Include(p => p.AnioNavigation).Include(p => p.CodItemNavigation);
-            List<Item> items = await _context.Items.ToListAsync();
+            var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
-            List<Concepto> conceptos = await _context.Conceptos.ToListAsync();
+
+            var conceptos = await _context.Conceptos.ToListAsync();
             ViewBag.Conceptos = conceptos;
+
             return View(await sistPresupuestosContext.ToListAsync());
         }
 

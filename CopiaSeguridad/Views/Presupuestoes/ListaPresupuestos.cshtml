@@ -13,9 +13,25 @@
                 <div class="input-group mb-3">
                     <select class="form-select" aria-label="cboAnio">
                         <option selected>Seleccionar año</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                        @{
+                            List<Int16?> repeticionAnio = new List<Int16?>();
+                        }
+                        @foreach (var presu in Model)
+                        {
+                            var repetido = false;
+                            foreach (Int16? anio in repeticionAnio)
+                            {
+                                if (presu.Anio == anio)
+                                {
+                                    repetido = true;
+                                }
+                            }
+                            if (repetido == false)
+                            {
+                                <option value="@presu.Anio">@presu.Anio</option>
+                                repeticionAnio.Add(presu.Anio);
+                            }
+                        }
                     </select>
                 </div>
             </div>
@@ -24,9 +40,25 @@
                 <div class="input-group mb-3">
                     <select class="form-select" aria-label="cboMes">
                         <option selected>Seleccionar mes</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                        @{
+                            List<byte?> repeticionMes = new List<byte?>();
+                        }
+                        @foreach (var presu in Model)
+                        {
+                            var repetido = false;
+                            foreach (byte mes in repeticionMes)
+                            {
+                                if (presu.Mes == mes)
+                                {
+                                    repetido = true;
+                                }
+                            }
+                            if (repetido == false)
+                            {
+                                <option value="@presu.Mes">@presu.Mes</option>
+                                repeticionMes.Add(presu.Mes);
+                            }
+                        }
                     </select>
                 </div>
             </div>
@@ -35,9 +67,10 @@
                 <div class="input-group mb-3">
                     <select class="form-select" aria-label="cboConcepto">
                         <option selected>Seleccionar concepto</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                        @foreach (var concepto in ViewBag.Conceptos)
+                        {
+                            <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                        }
                     </select>
                 </div>
             </div>
@@ -73,6 +106,7 @@
                 <tr>
                     <th scope="col">Item</th>
                     <th scope="col">Tipo</th>
+                    <th scope="col">Concepto</th>
                     @*Suma de presupuestos*@
                     <th scope="col">Presupuesto anual</th>
                     @*Suma de facturas*@

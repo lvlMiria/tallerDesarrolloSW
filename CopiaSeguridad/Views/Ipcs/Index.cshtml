@@ -14,59 +14,67 @@
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="card" style="width: 30rem;border-color:forestgreen">
             <div class="card-body">
-                @*Valor*@
-                <div class="row m-1">
-                    <label for="txtValor" class="form-label">Valor</label>
-                    <div class="input-group mb-3">
-                        <input type="text" placeholder="@ViewBag.PrimerItem.Valor" class="form-control" aria-label="txtValor">
-                    </div>
-                </div>
-                @*Año*@
-                <div class="row m-1">
-                    <label for="txtAnio" class="form-label">Año</label>
-                    <div class="input-group mb-3">
-                        <input type="text" placeholder="@ViewBag.PrimerItem.Anio" class="form-control" aria-label="txtAnio">
-                    </div>
-                </div>
-                @*Botones*@
-                <div class="row" style="margin-top:40px">
-
-                    <div class="col-12 col-md-4">
-                        <div class="m-2">
-                            <a asp-action="Index" asp-controller="Home">
-                                <div class="d-grid gap-2">
-                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
-                                </div>
-                            </a>
+                <form asp-action="ObtenerValor" method="POST">
+                    @*Valor*@
+                    <div class="row m-1">
+                        <label for="txtValor" class="form-label">Valor</label>
+                        <div class="input-group mb-3">
+                            <input type="text" value="@ViewBag.Mostrar.Valor" class="form-control" aria-label="txtValor">
                         </div>
                     </div>
+                    @*Año*@
+                    <div class="row m-1">
+                        <label for="txtAnio" class="form-label">Año</label>
+                        <div class="input-group mb-3">
+                            <input type="text" value="@ViewBag.Mostrar.Anio" class="form-control" aria-label="txtAnio" name="txtAnio">
+                            <button class="btn btn-outline-secondary" type="submit" id="obtenerValor">
+                                <span class="material-icons">
+                                    search
+                                </span>
+                            </button>
+                        </div>
+                        <span class="alert-danger">@ViewBag.Error</span>
+                    </div>
+                    @*Botones*@
+                    <div class="row" style="margin-top:40px">
 
-                    @* <div class="col-12 col-md-4">
-                        <div class="m-2">
-                            <div class="d-grid gap-2">
-                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <a asp-action="Index" asp-controller="Home">
+                                    <div class="d-grid gap-2">
+                                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
+                                    </div>
+                                </a>
                             </div>
                         </div>
-                    </div> *@
 
-                    <div class="col-12 col-md-4">
-                        <div class="m-2">
-                            <a asp-action="Create">
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
                                 <div class="d-grid gap-2">
-                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
                                 </div>
-                            </a>
+                            </div>
                         </div>
-                    </div>
 
-                </div>
+                        <div class="col-12 col-md-4">
+                            <div class="m-2">
+                                <a asp-action="Create">
+                                    <div class="d-grid gap-2">
+                                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
             </div>
         </div>
 
     </div>
 
-    <div class="container-fluid d-flex flex-column align-items-center">
-        @*Histórico*@
+    @* <div class="container-fluid d-flex flex-column align-items-center">
+
         <div class="row m-1">
             <p style="font-weight:bold">Histórico</p>
         </div>
@@ -78,7 +86,7 @@
                 </p>
             }
         </div>
-    </div>
+    </div> *@
 
 </div>
 

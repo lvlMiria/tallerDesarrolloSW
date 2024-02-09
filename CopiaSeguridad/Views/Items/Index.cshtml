@@ -20,7 +20,7 @@
                     <button class="btn btn-outline-secondary" type="button" id="btnAtras">
                         <span class="material-icons">arrow_back_ios</span>
                     </button>
-                    <input type="text" value="@ViewBag.PrimerItem.DescItem" class="form-control" aria-label="nombre_item">
+                    <input type="text" value="@ViewBag.PrimerItem.CodItem - @ViewBag.PrimerItem.DescItem" class="form-control" id="nombre_item" aria-label="nombre_item">
                     <button class="btn btn-outline-secondary" type="button" id="btnAdelante">
                         <span class="material-icons">arrow_forward_ios</span>
                     </button>
@@ -31,7 +31,7 @@
             <div class="row m-2">
                 <label for="cboConcepto" class="form-label">Concepto</label>
                 <div class="input-group mb-3">
-                    <select class="form-select" id="cmbConcepto">
+                    <select class="form-select" id="cmbConcepto" name="cmbConcepto">
                         @foreach(var concepto in ViewBag.Conceptos)
                         { 
                             <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
@@ -49,55 +49,33 @@
                                 
                             }
                         </script>
-                        
+
                         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                         <script>
-                            //Botones atras y siguiente textbox AUN NO FUNCIONAN
-                            //siguiente
                             $(document).ready(function () {
                                 $('#btnAdelante').click(function () {
-                                    var codActual = $('#nombre_item').val();
-                                    console.log(codActual);
+                                    var separar = $('#nombre_item').val().split("-");
+                                    var codActual = separar[0].trim();
                                     $.ajax({
+                                        url: '/Items/RegistroSiguiente',
                                         type: 'GET',
-                                        url: '/ItemsController/RegistroSiguiente',
-                                        data: { codActual: codActual },
-                                        success: function (registroSiguiente) {
-                                            $('#nombre_item').val(registroSiguiente.DescItem);
-                                            $('#cmbConcepto').val(registroSiguiente.CodConcepto);
-                                            $('input[name="estado"]').prop('checked', false);
-                                            $('#rdbActivo').prop('checked', registroSiguiente.estado === 1);
-                                            $('#rdbInactivo').prop('checked', registroSiguiente.estado === 0);
+                                        data: {codActual: codActual},
+                                        success: function (data){
+                                            console.log("Estoy aquiiiiiii")
+                                            $('#nombre_item').val(data.CodItem);
+                                            $('#cmbConcepto').val(data.CodConcepto);
+
+                                            if (data.GastoInversion === "gasto") {
+                                                $('#rdbGasto').prop('checked', true);
+                                            } else if (data.GastoInversion === "inversion") {
+                                                $('#rdbInversion').prop('checked', true);
+                                            }
                                         },
-                                        error: function () {
-                                            alert('Error al obtener el registro siguiente');
-                                        }
-                                    });
-                                });
-                            });
-                            //atras
-                            $(document).ready(function () {
-                                $('#btnAnterior').click(function () {
-                                    var codActual = $('#nombre_item').val();
-                                    $.ajax({
-                                        type: 'GET',
-                                        url: '/ItemsController/RegistroAnterior',
-                                        data: { codActual: codActual },
-                                        success: function (registroAnterior) {
-                                            $('#nombre_item').val(registroAnterior.DescItem);
-                                            $('#cmbConcepto').val(registroAnterior.CodConcepto);
-                                            $('input[name="estado"]').prop('checked', false);
-                                            $('#rdbActivo').prop('checked', registroAnterior.estado === 1);
-                                            $('#rdbInactivo').prop('checked', registroAnterior.estado === 0);
-                                        },
-                                        error: function () {
-                                            alert('Error al obtener el registro anterior');
-                                        }
                                     });
                                 });
                             });
                         </script>
-                    }
+					}
                 </div>
             </div>
 

@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SistPresupuestosContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion"))
+        .EnableSensitiveDataLogging()); //Quitar luego
 
 //var infoCultura = new CultureInfo("es-ES");
 //infoCultura.NumberFormat.NumberDecimalSeparator = ",";

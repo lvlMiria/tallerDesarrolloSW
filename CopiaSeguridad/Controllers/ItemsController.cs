@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Presentacion.Models;
 
 namespace Presentacion.Controllers
@@ -12,9 +13,9 @@ namespace Presentacion.Controllers
     public class ItemsController : Controller
     {
         private readonly SistPresupuestosContext _context;
-        private readonly ILogger<IpcsController> _logger;
+        private readonly ILogger<ItemsController> _logger;
 
-        public ItemsController(SistPresupuestosContext context, ILogger<IpcsController> logger)
+        public ItemsController(SistPresupuestosContext context, ILogger<ItemsController> logger)
         {
             _context = context;
             _logger = logger;
@@ -43,11 +44,30 @@ namespace Presentacion.Controllers
 
         public IActionResult RegistroSiguiente(string codActual)
         {
-            var registroSiguiente = _context.Items.OrderBy(i => i.CodItem)
-                .FirstOrDefault(i => int.Parse(i.CodItem) > int.Parse(codActual));
-            _logger.LogInformation("============="+registroSiguiente);
+            string codSiguiente = ((int.Parse(codActual)+1).ToString());
+            if (codSiguiente.Length == 1)
+            {
+                codSiguiente = "000" + codSiguiente;
+            }
+            else if (codSiguiente.Length == 2)
+            {
+                codSiguiente = "00" + codSiguiente;
+            }
+            else if (codSiguiente.Length == 3)
+            {
+                codSiguiente = "0" + codSiguiente;
+            }
 
-            return Json(registroSiguiente);
+            //NO ESTA ENTRANDO EN NINGUNO WOT
+            if(_context.Items.FirstOrDefault(i => i.CodItem == codSiguiente) != null)
+            {
+                return Json(_context.Items.Where(i=>i.CodItem == codSiguiente).FirstOrDefault());
+            }
+            else
+            {
+                return Json(_context.Items.OrderBy(i => i.CodItem).FirstOrDefault());
+            }
+
         }
 
         // GET: Items/Details/5

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Presentacion.Models;
 
 namespace Presentacion.Controllers
@@ -12,22 +13,54 @@ namespace Presentacion.Controllers
     public class IpcsController : Controller
     {
         private readonly SistPresupuestosContext _context;
-        public IpcsController(SistPresupuestosContext context)
+        private readonly ILogger<IpcsController> _logger;
+        public IpcsController(SistPresupuestosContext context, ILogger<IpcsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Ipcs
         public async Task<IActionResult> Index()
         {
+            ViewBag.Error = "";
+
             //Primer item de la tabla
-            ViewBag.PrimerItem = _context.Ipcs
+            ViewBag.Mostrar = _context.Ipcs
                 .OrderByDescending(tc => tc.Anio)
                 .FirstOrDefault();
 
             return _context.Ipcs != null ? 
                           View(await _context.Ipcs.OrderByDescending(tc => tc.Anio).ToListAsync()) :
                           Problem("Entity set 'SistPresupuestosContext.Ipcs'  is null.");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ObtenerValor(string txtAnio)
+        {
+            if (!txtAnio.IsNullOrEmpty())
+            {
+                Int16 anio = Int16.Parse(txtAnio);
+                if (_context.Ipcs.Where(i => i.Anio == anio).FirstOrDefault() != null)
+                {
+                    ViewBag.Error = "";
+                    ViewBag.Mostrar = _context.Ipcs.Where(i => i.Anio == anio).FirstOrDefault();
+                    return View("Index");
+                }
+                ViewBag.Mostrar = _context.Ipcs
+                .OrderByDescending(tc => tc.Anio)
+                .FirstOrDefault();
+
+                ViewBag.Error = "Año no ingresado en la base de datos.";
+                return View("Index");
+            }
+            ViewBag.Mostrar = _context.Ipcs
+                .OrderByDescending(tc => tc.Anio)
+                .FirstOrDefault();
+
+            ViewBag.Error = "Ingrese un año por favor.";
+            return View("Index");
+
         }
 
         // GET: Ipcs/Details/5

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Presentacion.Models;
 
@@ -11,6 +12,7 @@ public partial class Factura
 
     public int? Monto { get; set; }
 
+    [Range(1, 12, ErrorMessage = "Los meses deben ser del {1} al {2}.")]
     public byte? MesContable { get; set; }
 
     public short? AnioContable { get; set; }

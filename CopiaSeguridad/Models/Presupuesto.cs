@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Presentacion.Models;
 
@@ -7,6 +8,7 @@ public partial class Presupuesto
 {
     public string CodPresupuesto { get; set; } = null!;
 
+    [Range(1,12, ErrorMessage = "Los meses deben ser del {1} al {2}.")]
     public byte? Mes { get; set; }
 
     public short? Anio { get; set; }

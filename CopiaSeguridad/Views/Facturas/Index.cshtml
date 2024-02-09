@@ -89,6 +89,22 @@
                     }
                 }
             </script>
+            <script>
+                //Capturar item seleccionado
+                var cmbItems = document.getElementById('cmbItems');
+
+                cmbItems.addEventListener('change', function () {
+                    var itemSeleccionado = cmbItems.value;
+                });
+                //AQUI QUEDE. AUN NO FUNCIONA
+                $.ajax({
+                    url: '/Facturas/ActualizarFacturas',
+                    data: { codItem: itemSeleccionado },
+                    success: function (data) {
+                        alert('Todo Ok');
+                    }
+                });
+            </script>
         }
 
         <div class="row m-3">
@@ -118,9 +134,13 @@
         </div>
 
         @{
-            //Agregar condición (si chkSIT esta marcado)
-            var separarSIT = ViewBag.PrimerItemCF.Origen.Split("-");
-            var numSIT = separarSIT[1];
+            //Cuando es SIT, separa y almacena el número
+            var numSIT = "";
+            if (ViewBag.PrimerItemCF.Origen.StartsWith("sit"))
+            {
+                var separarSIT = ViewBag.PrimerItemCF.Origen.Split("-");
+                numSIT = separarSIT[1];
+            }
         }
         @*SIT o Contrato*@
         <div class="row m-2">
