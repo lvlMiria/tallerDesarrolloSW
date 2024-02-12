@@ -19,14 +19,14 @@
                     <div class="row m-1">
                         <label for="txtValor" class="form-label">Valor</label>
                         <div class="input-group mb-3">
-                            <input type="text" value="@ViewBag.Mostrar.Valor" class="form-control" aria-label="txtValor">
+                            <input type="text" value="@ViewBag.Mostrar.Valor" class="form-control" aria-label="txtValor" name="txtValor" id="txtValor">
                         </div>
                     </div>
                     @*Año*@
                     <div class="row m-1">
                         <label for="txtAnio" class="form-label">Año</label>
                         <div class="input-group mb-3">
-                            <input type="text" value="@ViewBag.Mostrar.Anio" class="form-control" aria-label="txtAnio" name="txtAnio">
+                            <input type="text" value="@ViewBag.Mostrar.Anio" class="form-control" aria-label="txtAnio" name="txtAnio" id="txtAnio">
                             <button class="btn btn-outline-secondary" type="submit" id="obtenerValor">
                                 <span class="material-icons">
                                     search
@@ -51,10 +51,35 @@
                         <div class="col-12 col-md-4">
                             <div class="m-2">
                                 <div class="d-grid gap-2">
-                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
+                                    <button id="btnActualizar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
                                 </div>
                             </div>
                         </div>
+
+                        @section scripts{
+                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                $(document).ready(function () {
+                                    $('#btnActualizar').click(function () {
+                                        var anio = $('#txtAnio').val();
+                                        var valor = $('#txtValor').val();
+                                        console.log(valor,anio);
+                                        $.ajax({
+                                            url: '/Ipcs/Edit',
+                                            type: 'POST',
+                                            data: { id: anio, valor: valor },
+                                            success: function (data) {
+                                                console.log("YIPIEEEEE");
+                                            },
+                                            error: function (xhr, status, error) {
+                                                console.log("Error en la solicitud AJAX: " + error);
+                                            }
+
+                                        });
+                                    });
+                                });
+                            </script>
+                        }
 
                         <div class="col-12 col-md-4">
                             <div class="m-2">

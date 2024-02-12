@@ -116,26 +116,26 @@ namespace Presentacion.Controllers
 
         // GET: TipoCambios/Edit/5
 
-        public async Task<IActionResult> Edit(byte? mes,Int16? anio)
-        {
-            if (mes == null || anio == null || _context.TipoCambios == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Edit(byte? mes,Int16? anio)
+        //{
+        //    if (mes == null || anio == null || _context.TipoCambios == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var tipoCambio = await _context.TipoCambios.FindAsync(mes,anio);
-            if (tipoCambio == null)
-            {
-                return NotFound();
-            }
-            return View(tipoCambio);
-        }
+        //    var tipoCambio = await _context.TipoCambios.FindAsync(mes,anio);
+        //    if (tipoCambio == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(tipoCambio);
+        //}
 
         // POST: TipoCambios/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[ValidateAntiForgeryToken]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(byte mes,Int16 anio, [Bind("Mes,Anio,Valor")] TipoCambio tipoCambio)
         {
             if (mes != tipoCambio.Mes || anio != tipoCambio.Anio)

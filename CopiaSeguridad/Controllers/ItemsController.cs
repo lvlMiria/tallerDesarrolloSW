@@ -36,12 +36,29 @@ namespace Presentacion.Controllers
         //Para moverse entre registros en index Items (flechas)
         public IActionResult RegistroAnterior(string codActual)
         {
-            var registroAnterior = _context.Items.OrderByDescending(i=>i.CodItem)
-                .FirstOrDefault(i=> int.Parse(i.CodItem) < int.Parse(codActual));
+            string codAnterior = ((int.Parse(codActual) - 1).ToString());
+            if(codAnterior == "0")
+            {
+                codAnterior = (_context.Items.OrderByDescending(i => i.CodItem).FirstOrDefault()).CodItem;
+            }
 
-            return Json(registroAnterior);
+            if (codAnterior.Length == 1)
+            {
+                codAnterior = "000" + codAnterior;
+            }
+            else if (codAnterior.Length == 2)
+            {
+                codAnterior = "00" + codAnterior;
+            }
+            else if (codAnterior.Length == 3)
+            {
+                codAnterior = "0" + codAnterior;
+            }
+
+            return Json(_context.Items.Where(i => i.CodItem == codAnterior).FirstOrDefault());
         }
 
+        [HttpGet]
         public IActionResult RegistroSiguiente(string codActual)
         {
             string codSiguiente = ((int.Parse(codActual)+1).ToString());
@@ -58,10 +75,10 @@ namespace Presentacion.Controllers
                 codSiguiente = "0" + codSiguiente;
             }
 
-            //NO ESTA ENTRANDO EN NINGUNO WOT
-            if(_context.Items.FirstOrDefault(i => i.CodItem == codSiguiente) != null)
+
+            if(_context.Items.Where(i => i.CodItem == codSiguiente).FirstOrDefault() != null)
             {
-                return Json(_context.Items.Where(i=>i.CodItem == codSiguiente).FirstOrDefault());
+                return Json(_context.Items.Where(i => i.CodItem == codSiguiente).FirstOrDefault());
             }
             else
             {
@@ -92,8 +109,9 @@ namespace Presentacion.Controllers
         // GET: Items/Create
         public async Task<IActionResult> Create()
         {
-            List<Concepto> conceptos = await _context.Conceptos.ToListAsync();
+            var conceptos = await _context.Conceptos.ToListAsync();
             ViewBag.Conceptos = conceptos;
+
             //ViewData["CodConcepto"] = new SelectList(_context.Conceptos, "CodConcepto", "CodConcepto");
             return View();
         }
@@ -105,42 +123,73 @@ namespace Presentacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CodItem,DescItem,GastoInversion,ContNuevo,CodConcepto,Estado")] Item item)
         {
+            string nuevoCod = (int.Parse(_context.Items.OrderByDescending(i => i.CodItem).FirstOrDefault().CodItem)+1).ToString();
+            if (nuevoCod.Length == 1)
+            {
+                nuevoCod = "000" + nuevoCod;
+            }
+            else if (nuevoCod.Length == 2)
+            {
+                nuevoCod = "00" + nuevoCod;
+            }
+            else if (nuevoCod.Length == 3)
+            {
+                nuevoCod = "0" + nuevoCod;
+            }
+
+            item.CodItem = nuevoCod;
+
+            //FALTA QUE EL CODITEM PASE EL MDELSTATE.ISVALID
+
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("AAAAAAAAA");
                 _context.Add(item);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            else //CUANDO FUNCIONE, PUEDES QUITAR ESTO
+            {
+                _logger.LogInformation("ESTOS SON LOS ERRORES: ");
+                foreach(var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogInformation(error.ErrorMessage);
+                }
+            }//Hasta aqui
+            var conceptos = await _context.Conceptos.ToListAsync();
+            ViewBag.Conceptos = conceptos;
             ViewData["CodConcepto"] = new SelectList(_context.Conceptos, "CodConcepto", "CodConcepto", item.CodConcepto);
             return View(item);
         }
 
         // GET: Items/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null || _context.Items == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Edit(string id)
+        //{
+        //    if (id == null || _context.Items == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var item = await _context.Items.FindAsync(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            ViewData["CodConcepto"] = new SelectList(_context.Conceptos, "CodConcepto", "CodConcepto", item.CodConcepto);
-            return View(item);
-        }
+        //    var item = await _context.Items.FindAsync(id);
+        //    if (item == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    ViewData["CodConcepto"] = new SelectList(_context.Conceptos, "CodConcepto", "CodConcepto", item.CodConcepto);
+        //    return View(item);
+        //}
 
         // POST: Items/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[ValidateAntiForgeryToken]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("CodItem,DescItem,GastoInversion,ContNuevo,CodConcepto,Estado")] Item item)
         {
             if (id != item.CodItem)
             {
+                //Entra aquí, pero creo que es porque en la base de datos el "0001" tiene un espacio al final.
+                //Y claro, es un char(5). Voy a tener que hacer la tabla de nuevo. Espero no afecte aquí ;^;
                 return NotFound();
             }
 

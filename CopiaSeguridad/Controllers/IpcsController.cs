@@ -104,33 +104,28 @@ namespace Presentacion.Controllers
         }
 
         // GET: Ipcs/Edit/5
-        public async Task<IActionResult> Edit(short? id)
-        {
-            if (id == null || _context.Ipcs == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Edit(short? id)
+        //{
+        //    if (id == null || _context.Ipcs == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var ipc = await _context.Ipcs.FindAsync(id);
-            if (ipc == null)
-            {
-                return NotFound();
-            }
-            return View(ipc);
-        }
+        //    var ipc = await _context.Ipcs.FindAsync(id);
+        //    if (ipc == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(ipc);
+        //}
 
         // POST: Ipcs/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[ValidateAntiForgeryToken]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(short id, [Bind("Anio,Valor")] Ipc ipc)
         {
-
-            if (id != ipc.Anio)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -141,6 +136,7 @@ namespace Presentacion.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
+                    //está entrando aquí porque convierte el 4,2 en 4.2 ARREGLAR
                     if (!IpcExists(ipc.Anio))
                     {
                         return NotFound();

@@ -52,6 +52,7 @@
 
                         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                         <script>
+                            //Para avanzar con flecha
                             $(document).ready(function () {
                                 $('#btnAdelante').click(function () {
                                     var separar = $('#nombre_item').val().split("-");
@@ -61,16 +62,97 @@
                                         type: 'GET',
                                         data: {codActual: codActual},
                                         success: function (data){
-                                            console.log("Estoy aquiiiiiii")
-                                            $('#nombre_item').val(data.CodItem);
-                                            $('#cmbConcepto').val(data.CodConcepto);
+                                            $('#nombre_item').val(data['codItem'] + " - " + data['descItem']);
+                                            $('#cmbConcepto').val(data['codConcepto']);
 
-                                            if (data.GastoInversion === "gasto") {
+                                            if (data['gastoInversion'] === "gasto") {
                                                 $('#rdbGasto').prop('checked', true);
-                                            } else if (data.GastoInversion === "inversion") {
+                                            } else if (data['gastoInversion'] === "inversion") {
                                                 $('#rdbInversion').prop('checked', true);
                                             }
+
+                                            if (data['contNuevo'] === "continuidad operativa") {
+                                                $('#rdbContinuidad').prop('checked', true);
+                                            } else if (data['contNuevo'] === "nuevo proyecto") {
+                                                $('#rdbNuevo').prop('checked', true);
+                                            }
+
+                                            if (data['estado'] === 0) {
+                                                $('#rdbInactivo').prop('checked', true);
+                                            } else if (data['estado'] === 1) {
+                                                $('#rdbActivo').prop('checked', true);
+                                            }
                                         },
+                                    });
+                                });
+                            });
+                        </script>
+                        <script>
+                            //Para retroceder
+                            $(document).ready(function () {
+                                $('#btnAtras').click(function () {
+                                    var separar = $('#nombre_item').val().split("-");
+                                    var codActual = separar[0].trim();
+                                    $.ajax({
+                                        url: '/Items/RegistroAnterior',
+                                        type: 'GET',
+                                        data: { codActual: codActual },
+                                        success: function (data) {
+                                            $('#nombre_item').val(data['codItem'] + " - " + data['descItem']);
+                                            $('#cmbConcepto').val(data['codConcepto']);
+
+                                            if (data['gastoInversion'] === "gasto") {
+                                                $('#rdbGasto').prop('checked', true);
+                                            } else if (data['gastoInversion'] === "inversion") {
+                                                $('#rdbInversion').prop('checked', true);
+                                            }
+
+                                            if (data['contNuevo'] === "continuidad operativa") {
+                                                $('#rdbContinuidad').prop('checked', true);
+                                            } else if (data['contNuevo'] === "nuevo proyecto") {
+                                                $('#rdbNuevo').prop('checked', true);
+                                            }
+
+                                            if (data['estado'] === 0) {
+                                                $('#rdbInactivo').prop('checked', true);
+                                            } else if (data['estado'] === 1) {
+                                                $('#rdbActivo').prop('checked', true);
+                                            }
+                                        },
+                                    });
+                                });
+                            });
+                        </script>
+                        <script>
+                            //Para grabar
+                            //CodItem,DescItem,GastoInversion,ContNuevo,CodConcepto,Estado
+                            $(document).ready(function () {
+                                $('#btnGrabar').click(function () {
+                                    var separar = $('#nombre_item').val().split("-");
+                                    var codItem = separar[0].trim();
+                                    var descItem = separar[1].trim();
+                                    var gastoInv = $('input[name="rdbGastoInv"]:checked').val();
+                                    var contNuevo = $('input[name="rdbContNuevo"]:checked').val();
+                                    var codConcepto = $('#cmbConcepto').val();
+                                    var estado = $('input[name="rdbEstado"]:checked').val();
+                                    //var estadoByte = estado & 0xFF;
+
+                                    $.ajax({
+                                        url: '/Items/Edit',
+                                        type: 'POST',
+                                        data: { codItem: codItem, descItem: descItem, gastoInversion: gastoInv, contNuevo: contNuevo, codConcepto: codConcepto, estado: estado },
+                                        success: function (data) {
+                                            console.log("YIPIEEEEE");
+                                            //Lanza el modal de éxito
+                                            $('#modalGrabar').modal("show");
+                                            $('#cerrarModal').click(function () {
+                                                $('#modalGrabar').modal('hide');
+                                            });
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.log("Error en la solicitud AJAX: " + error);
+                                        }
+
                                     });
                                 });
                             });
@@ -170,7 +252,7 @@
                 <div class="col-12 col-md-4">
                     <div class="m-2">
                         <div class="d-grid gap-2">
-                            <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                            <button id="btnGrabar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
                         </div>
                     </div>
                 </div>
@@ -179,6 +261,26 @@
         </form>
     </div>
 
+</div>
+
+@*MODAL EXITO AL GRABAR*@
+<div class="modal" tabindex="-1" role="dialog" id="modalGrabar">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actualización exitosa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Se grabaron los cambios.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cerrarModal" type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @* ============= Original ==============

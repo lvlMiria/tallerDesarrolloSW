@@ -1,5 +1,4 @@
 ﻿@model IEnumerable<Presentacion.Models.TipoCambio>
-@* @model Presentacion.Models.TipoCambio *@
 
 @{
     ViewData["Title"] = "Valor USD";
@@ -15,12 +14,13 @@
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="card" style="width: 30rem;border-color:forestgreen">
             <div class="card-body">
+                @*La acción del form es para buscar un valor a partir del mes y año ingresados EN NÚMEROS*@
                 <form asp-action="ObtenerValor" method="POST">
                     @*Valor*@
                     <div class="row m-1 form-group">
                         <label for="txtValor" class="form-label">Valor</label>
                         <div class="input-group mb-3">
-                            <input type="text" value="@ViewBag.Mostrar.Valor" class="form-control" name="txtValor">
+                            <input type="text" value="@ViewBag.Mostrar.Valor" class="form-control" name="txtValor" id="txtValor">
                         </div>
                     </div>
                     @*Mes*@
@@ -28,6 +28,7 @@
                         <label for="txtMes" class="form-label">Mes</label>
                         <div class="input-group mb-3">
                             <input type="text" value="@ViewBag.Mostrar.Mes" class="form-control" name="txtMes" id="txtMes">
+                            @*Este botón ejecuta la búsqueda*@
                             <button class="btn btn-outline-secondary" type="submit" id="obtenerValor">
                                 <span class="material-icons">
                                     search
@@ -45,7 +46,7 @@
                     <span class="alert-danger">@ViewBag.Error</span>
                     @*Botones*@
                     <div class="row form-group" style="margin-top:40px">
-
+                        @*Volver a inicio*@
                         <div class="col-12 col-md-4">
                             <div class="m-2">
                                 <a asp-action="Index" asp-controller="Home">
@@ -56,16 +57,16 @@
                             </div>
                         </div>
 
+                        @*Actualizar valor (usa script. Ver mas abajo)*@
                         <div class="col-12 col-md-4">
                             <div class="m-2">
-                                <a asp-action="Edit">
                                 <div class="d-grid gap-2">
-                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
+                                    <button id="btnActualizar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
                                 </div>
-                                </a>
                             </div>
                         </div>
 
+                        @*Nuevo valor dólar. Lleva a vista Create*@
                         <div class="col-12 col-md-4">
                             <div class="m-2">
                                 <a asp-action="Create">
@@ -83,7 +84,58 @@
 
     </div>
 
-    
+    @section scripts {
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            //Para actualizar el valor del dólar
+            $(document).ready(function () {
+                $('#btnActualizar').click(function () {
+                    var mes = parseInt($('#txtMes').val(), 10);
+                    var mesByte = mes & 0xFF;
+                    var anio = parseInt($('#txtAnio').val(), 10);
+                    var anioShort = anio & 0xFFFF;
+                    var valor = parseInt($('#txtValor').val(), 10);
+
+                    $.ajax({
+                        url: '/TipoCambios/Edit',
+                        type: 'POST',
+                        data: { mes: mes, anio: anio, valor: valor },
+                        success: function (data) {
+                            console.log("YIPIEEEEE");
+                            //Lanza el modal de éxito
+                            $('#modalActualizacion').modal("show");
+                            $('#cerrarModal').click(function () {
+                                $('#modalActualizacion').modal('hide');
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Error en la solicitud AJAX: " + error);
+                        }
+
+                    });
+                });
+            });
+        </script>
+    }
+    @*MODAL ACTUALIZACIÓN EXISTOSA*@
+    <div class="modal" tabindex="-1" role="dialog" id="modalActualizacion">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Actualización exitosa</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>El valor del dólar se ha actualizado exitosamente.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="cerrarModal" type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     @* <div class="container-fluid d-flex flex-column align-items-center">
         <div class="row m-1">
