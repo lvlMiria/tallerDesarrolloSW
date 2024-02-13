@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Presentacion.Models;
 
 public partial class ControlFactura
 {
-    public string CodControl { get; set; } = null!;
+    public int CodControl { get; set; }
 
-    public string? CodPresupuesto { get; set; }
+    public int? CodPresupuesto { get; set; }
 
-    public string? CodFactura { get; set; }
+    public int? CodFactura { get; set; }
 
     public string? Origen { get; set; }
 

@@ -90,8 +90,8 @@ namespace Presentacion.Controllers
         // POST: Ipcs/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[ValidateAntiForgeryToken]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Anio,Valor")] Ipc ipc)
         {
             if (ModelState.IsValid)
@@ -136,7 +136,6 @@ namespace Presentacion.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    //está entrando aquí porque convierte el 4,2 en 4.2 ARREGLAR
                     if (!IpcExists(ipc.Anio))
                     {
                         return NotFound();

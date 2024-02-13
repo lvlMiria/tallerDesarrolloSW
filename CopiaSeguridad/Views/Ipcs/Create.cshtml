@@ -14,13 +14,13 @@
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="card" style="width: 30rem;border-color:forestgreen">
             <div class="card-body">
-                <form asp-action="Create">
+                <form>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     @*Valor*@
                     <div class="row m-1">
-                        <label for="txtValor" class="form-label">Valor (Separador decimal con punto)</label>
+                        <label for="txtValor" class="form-label">Valor (Separador decimal con coma)</label>
                         <div class="input-group mb-3">
-                            <input asp-for="Valor" type="text" class="form-control" aria-label="txtValor">
+                            <input id="txtValor" type="text" class="form-control" aria-label="txtValor">
                             <span asp-validation-for="Anio" class="text-danger"></span>
                         </div>
                     </div>
@@ -28,7 +28,7 @@
                     <div class="row m-1">
                         <label for="txtAnio" class="form-label">Año</label>
                         <div class="input-group mb-3">
-                            <input asp-for="Anio" type="text" class="form-control" aria-label="txtAnio">
+                            <input id="txtAnio" type="text" class="form-control" aria-label="txtAnio">
                             <span asp-validation-for="Anio" class="text-danger"></span>
                         </div>
                     </div>
@@ -45,22 +45,13 @@
                             </div>
                         </div>
 
-                        @* <div class="col-12 col-md-4">
-                        <div class="m-2">
-                        <div class="d-grid gap-2">
-                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
-                        </div>
-                        </div>
-                        </div> *@
-
                         <div class="col-12 col-md-4">
                             <div class="m-2">
                                 <div class="d-grid gap-2">
-                                    <button type="submit" style=" background-color: forestgreen; color: white;" class="btn">Ingresar</button>
+                                    <button id="btnIngresar" style=" background-color: forestgreen; color: white;" class="btn">Ingresar</button>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </form>
             </div>
@@ -69,6 +60,36 @@
     </div>
 
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#btnIngresar').click(function () {
+                var anio = parseInt($('#txtAnio').val()) & 0xFFFF;
+                var valor = $('#txtValor').val();
+                console.log(anio, valor);
+                $.ajax({
+                    //LLAMA A CREATE TIPO GET, IDK
+                    url: '/Ipcs/Create',
+                    type: 'POST',
+                    data: { anio: anio, valor: valor },
+                    success: function (data) {
+                        console.log("YIPIEEEEE");
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error en la solicitud AJAX: " + error);
+                    }
+
+                });
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
 
 @* <div class="row">
     <div class="col-md-4">
@@ -95,6 +116,3 @@
     <a asp-action="Index">Back to List</a>
 </div>
  *@
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

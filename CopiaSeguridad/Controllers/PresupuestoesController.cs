@@ -21,7 +21,7 @@ namespace Presentacion.Controllers
         // GET: Presupuestoes
         public async Task<IActionResult> Index()
         {
-            var sistPresupuestosContext = _context.Presupuestos.Include(p => p.AnioNavigation).Include(p => p.CodItemNavigation);
+           
             var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
 
@@ -32,14 +32,16 @@ namespace Presentacion.Controllers
             ViewBag.Facturas = facturas;
 
             int mesActual = DateTime.Now.Month;
+            ViewBag.Presupuestos = _context.Presupuestos.Where(p => p.Mes == mesActual).ToList();
 
-            return View(await sistPresupuestosContext.Include(p => p.Mes == mesActual).ToListAsync());
+            return View();
+            
         }
 
         // GET: Lista de Presupuestos
         public async Task<IActionResult> ListaPresupuestos()
         {
-            var sistPresupuestosContext = _context.Presupuestos.Include(p => p.AnioNavigation).Include(p => p.CodItemNavigation);
+            var sistPresupuestosContext = _context.Presupuestos.Include(p => p.CodItemNavigation);
             var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
 
@@ -50,7 +52,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Presupuestoes/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(int id)
         {
             if (id == null || _context.Presupuestos == null)
             {
@@ -58,7 +60,6 @@ namespace Presentacion.Controllers
             }
 
             var presupuesto = await _context.Presupuestos
-                .Include(p => p.AnioNavigation)
                 .Include(p => p.CodItemNavigation)
                 .FirstOrDefaultAsync(m => m.CodPresupuesto == id);
             if (presupuesto == null)
@@ -96,7 +97,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Presupuestoes/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(int id)
         {
             if (id == null || _context.Presupuestos == null)
             {
@@ -118,7 +119,7 @@ namespace Presentacion.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("CodPresupuesto,Mes,Anio,PresupuestoMes,CodItem")] Presupuesto presupuesto)
+        public async Task<IActionResult> Edit(int id, [Bind("CodPresupuesto,Mes,Anio,PresupuestoMes,CodItem")] Presupuesto presupuesto)
         {
             if (id != presupuesto.CodPresupuesto)
             {
@@ -151,7 +152,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Presupuestoes/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (id == null || _context.Presupuestos == null)
             {
@@ -159,7 +160,6 @@ namespace Presentacion.Controllers
             }
 
             var presupuesto = await _context.Presupuestos
-                .Include(p => p.AnioNavigation)
                 .Include(p => p.CodItemNavigation)
                 .FirstOrDefaultAsync(m => m.CodPresupuesto == id);
             if (presupuesto == null)
@@ -173,7 +173,7 @@ namespace Presentacion.Controllers
         // POST: Presupuestoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Presupuestos == null)
             {
@@ -189,7 +189,7 @@ namespace Presentacion.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PresupuestoExists(string id)
+        private bool PresupuestoExists(int id)
         {
           return (_context.Presupuestos?.Any(e => e.CodPresupuesto == id)).GetValueOrDefault();
         }

@@ -24,6 +24,7 @@
             <label for="cboItems" class="form-label">Item</label>
             <div class="input-group mb-3">
                 <select class="form-select" aria-label="cboItems" id="cboItems">
+                    <option selected>Seleccione un item</option>
                     @foreach (var item in ViewBag.Items)
                     {
                         <option value="@item.CodItem">@item.DescItem</option>
@@ -39,7 +40,7 @@
                 <button class="btn btn-outline-secondary" type="button" id="btnAtras">
                     <span class="material-icons">arrow_back_ios</span>
                 </button>
-                <input type="text" class="form-control" aria-label="nFactura" value="@ViewBag.PrimerItemF.NumFactura">
+                <input id="nFactura" type="text" class="form-control" aria-label="nFactura" value="">
                 <button class="btn btn-outline-secondary" type="button" id="btnAdelante">
                     <span class="material-icons">arrow_forward_ios</span>
                 </button>
@@ -51,7 +52,7 @@
             <label for="txtMonto" class="form-label">Monto</label>
             <div class="input-group mb-3">
                 <span class="input-group-text">$</span>
-                <input type="text" class="form-control" aria-label="txtMonto" value="@ViewBag.PrimerItemF.Monto">
+                <input id="txtMonto" type="text" class="form-control" aria-label="txtMonto" value="">
             </div>
         </div>
 
@@ -69,52 +70,60 @@
 
         @section scripts {
             <script>
-                //Combobox Item del primer registro
-                var primerCodItem = '@ViewBag.PrimerItemP.CodItem';
-                var select = document.getElementById('cmbItems');
-                for (var i = 0; i < select.options.length; i++) {
-                    if (select.options[i].value === primerCodItem) {
-                        select.options[i].selected = true;
-                    }
-                }
-            </script>
-            <script>
-                
-                //Combobox Empresa del primer registro
-                var primeraEmpresa = '@ViewBag.PrimerItemF.Empresa';
-                var select = document.getElementById('cboEmpresa');
-                for (var i = 0; i < select.options.length; i++) {
-                    if (select.options[i].value === primeraEmpresa) {
-                        select.options[i].selected = true;
-                    }
-                }
-            </script>
-            <script>
-                //Capturar item seleccionado
-                var cmbItems = document.getElementById('cmbItems');
+                document.addEventListener("DOMContentLoaded", function () {
+                    var cboItems = document.getElementById("cboItems");
+                    var nFactura = document.getElementById("nFactura");
+                    var facturas = [];
 
-                cmbItems.addEventListener('change', function () {
-                    var itemSeleccionado = cmbItems.value;
-                });
-                //AQUI QUEDE. AUN NO FUNCIONA
-                $.ajax({
-                    url: '/Facturas/ActualizarFacturas',
-                    data: { codItem: itemSeleccionado },
-                    success: function (data) {
-                        alert('Todo Ok');
-                    }
+                    // Obtener los números de factura correspondientes al item seleccionado
+                    cboItems.addEventListener("change", function () {
+                        var itemSeleccionado = cboItems.value;
+                        $.ajax({
+                            url: '/Facturas/ObtenerFacturas',
+                            type: 'GET',
+                            data: { codItem: itemSeleccionado },
+                            success: function (data) {
+                                facturas = data;
+                                if (facturas.length > 0) {
+                                    nFactura.value = facturas[0];
+                                } else {
+                                    nFactura.value = "No hay facturas disponibles";
+                                }
+                            },
+                        });
+                        
+                    });
+
+                    // Adelante
+                    document.getElementById("btnAdelante").addEventListener("click", function () {
+                        if (facturas.length > 0) {
+                            var indexActual = facturas.indexOf(nFactura.value);
+                            var sigIndex = (indexActual + 1) % facturas.length;
+                            nFactura.value = facturas[sigIndex];
+                        }
+                    });
+
+                    // Atras
+                    document.getElementById("btnAtras").addEventListener("click", function () {
+                        if (facturas.length > 0) {
+                            var indexActual = facturas.indexOf(nFactura.value);
+                            var indexAnterior = (indexActual - 1 + facturas.length) % facturas.length;
+                            nFactura.value = facturas[indexAnterior];
+                        }
+                    });
                 });
             </script>
+            
         }
 
         <div class="row m-3">
             <label for="dtRecepcion">Fecha de Recepción</label>
-            <input id="dtRecepcion" class="form-control" type="date" value="@String.Format("{0:yyyy/MM/dd}",ViewBag.PrimerItemCF.FechaRecepcion)" />
+            <input id="dtRecepcion" class="form-control" type="date" @* value="@String.Format("{0:yyyy-MM-dd}",)" *@ />
         </div>
 
         <div class="row m-3">
             <label for="dtEntrega">Fecha de Entrega</label>
-            <input id="dtEntrega" class="form-control" type="date" value="@String.Format("{0:yyyy/MM/dd}",ViewBag.PrimerItemCF.FechaEntrega)" />
+            <input id="dtEntrega" class="form-control" type="date" @* value="@String.Format("{0:yyyy-MM-dd}",)" *@ />
         </div>
 
         @*Mes y año contable*@
@@ -122,13 +131,13 @@
             <div class="col-6">
                 <label for="txtMes">Mes Contable</label>
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" aria-label="txtMes" value="@ViewBag.PrimerItemF.MesContable">
+                    <input id="txtMes" type="text" class="form-control" aria-label="txtMes" value="">
                 </div>
             </div>
             <div class="col-6">
                 <label for="txtAnio">Año Contable</label>
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" aria-label="txtAnio" value="@ViewBag.PrimerItemF.AnioContable">
+                    <input id="txtAnio" type="text" class="form-control" aria-label="txtAnio" value="">
                 </div>
             </div>
         </div>
@@ -136,18 +145,18 @@
         @{
             //Cuando es SIT, separa y almacena el número
             var numSIT = "";
-            if (ViewBag.PrimerItemCF.Origen.StartsWith("sit"))
-            {
-                var separarSIT = ViewBag.PrimerItemCF.Origen.Split("-");
-                numSIT = separarSIT[1];
-            }
+            // if (ViewBag.Control.Origen.StartsWith("sit"))
+            // {
+            //     var separarSIT = ViewBag.Control.Origen.Split("-");
+            //     numSIT = separarSIT[1];
+            //}
         }
         @*SIT o Contrato*@
         <div class="row m-2">
             <p>Origen</p>
             <div class="col-6">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbContrato" @(ViewBag.PrimerItemCF.Origen == "contrato" ? "checked" : "")>
+                    <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbContrato" @* @(ViewBag.Control.Origen == "contrato" ? "checked" : "" *@)>
                     <label class="form-check-label" for="rdbContrato">
                         Contrato
                     </label>
@@ -155,13 +164,13 @@
             </div>
             <div class="col-6">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbSIT" @(ViewBag.PrimerItemCF.Origen.StartsWith("sit") ? "checked" : "")>
+                    <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbSIT">
                     <label class="form-check-label" for="rdbSIT">
                         SIT
                     </label>
                 </div>
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" aria-label="txtSIT" value="@numSIT">
+                    <input id="txtSIT" type="text" class="form-control" aria-label="txtSIT" value="@numSIT">
                 </div>
             </div>
         </div>

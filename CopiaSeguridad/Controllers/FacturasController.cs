@@ -31,54 +31,28 @@ namespace Presentacion.Controllers
 
             //Primer item de la tabla
             var primerItemF = _context.Facturas.FirstOrDefault();
-            ViewBag.PrimerItemF = primerItemF;
+            ViewBag.Factura = primerItemF;
 
             var primerItemCF = await _context.ControlFacturas.FirstOrDefaultAsync(cf => cf.CodFactura == primerItemF.CodFactura);
-            ViewBag.PrimerItemCF = primerItemCF;
+            ViewBag.Control = primerItemCF;
 
             var primerItemP = await _context.Presupuestos.FirstOrDefaultAsync(p => p.CodPresupuesto == primerItemCF.CodPresupuesto);
-            ViewBag.PrimerItemP = primerItemP;
+            ViewBag.Presupuestos = primerItemP;
 
             return View(await sistPresupuestosContext.ToListAsync());
         }
 
-        public async Task<IActionResult> ActualizarFacturas(string codItem)
+        public async Task<IActionResult> ObtenerFacturas(Int16 codItem)
         {
-            var sistPresupuestosContext = _context.Facturas
-                .Include(f => f.TipoCambio);
+            var facturas = await _context.Facturas
+                .Where(f => f.ControlFacturas.Any(cf => cf.CodPresupuestoNavigation.CodItem == codItem))
+                .Select(f => f.NumFactura)
+                .ToListAsync();
 
-            //Para el combobox
-            var items = await _context.Items.ToListAsync();
-            ViewBag.Items = items;
-
-            //Item seleccionado
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.CodItem == codItem);
-            ViewBag.Item = item;
-
-            //Presupuestos de el item seleccionado
-            var presupuestos = await _context.Presupuestos.Where(p => p.CodItem == item.CodItem).ToListAsync();
-            ViewBag.Presupuestos = presupuestos;
-
-            //Control factura con ese presupuesto
-            var controlFactura = new List<ControlFactura>();
-            foreach(var presupuesto in presupuestos)
-            {
-                var juntar = await _context.ControlFacturas.Where(cf => cf.CodPresupuesto == presupuesto.CodPresupuesto).ToListAsync();
-                controlFactura.AddRange(juntar);
-            }
-            ViewBag.Control = controlFactura;
-            
-            //Factura de control factura
-            var factura = new List<Factura>();
-            foreach(var control in controlFactura)
-            {
-                var juntar2 = await _context.Facturas.Where(f => f.CodFactura == control.CodFactura).ToListAsync();
-                factura.AddRange(juntar2);
-            }
-            ViewBag.Factura = factura;
-
-            return View(await sistPresupuestosContext.ToListAsync());
+            return Json(facturas);
         }
+
+
 
         // GET: Lista de Facturas
         public async Task<IActionResult> ListaFacturas()
@@ -96,7 +70,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Facturas/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(int id)
         {
             if (id == null || _context.Facturas == null)
             {
@@ -136,28 +110,7 @@ namespace Presentacion.Controllers
             if (ultimoCodControl != null) {
 
                 //Se transforma a int para sumarle uno, luego a string y se le agregan los 0 necesarios para dejarlo de 6 cifras
-                string nuevoCodControl = "";
-                string nuevoCodIncompleto = (int.Parse(ultimoCodControl.CodControl) + 1).ToString();
-                if (nuevoCodIncompleto.Length == 1)
-                {
-                    nuevoCodControl = "00000" + nuevoCodIncompleto;
-                }else if(nuevoCodIncompleto.Length == 2)
-                {
-                    nuevoCodControl = "0000" + nuevoCodIncompleto;
-                }else if(nuevoCodIncompleto.Length == 3){
-                    nuevoCodControl = "000" + nuevoCodIncompleto;
-                }else if (nuevoCodIncompleto.Length == 4){
-                    nuevoCodControl = "00" + nuevoCodIncompleto;
-                }
-                else if (nuevoCodIncompleto.Length == 5)
-                {
-                    nuevoCodControl = "0" + nuevoCodIncompleto;
-                }
-                else
-                {
-                    nuevoCodControl = nuevoCodIncompleto;
-                }
-                //FALTA LO MISMO CON TODOS LOS COD. REVISAR SI SE PUEDE CAMBIAR A INT
+                int nuevoCodControl = ultimoCodControl.CodControl +1;
 
                 if (ModelState.IsValid)
                 {
@@ -179,7 +132,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Facturas/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(int id)
         {
             if (id == null || _context.Facturas == null)
             {
@@ -200,7 +153,7 @@ namespace Presentacion.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("CodFactura,NumFactura,Monto,MesContable,AnioContable,Empresa")] Factura factura)
+        public async Task<IActionResult> Edit(int id, [Bind("CodFactura,NumFactura,Monto,MesContable,AnioContable,Empresa")] Factura factura)
         {
             if (id != factura.CodFactura)
             {
@@ -232,7 +185,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Facturas/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (id == null || _context.Facturas == null)
             {
@@ -253,7 +206,7 @@ namespace Presentacion.Controllers
         // POST: Facturas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Facturas == null)
             {
@@ -269,7 +222,7 @@ namespace Presentacion.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool FacturaExists(string id)
+        private bool FacturaExists(int id)
         {
           return (_context.Facturas?.Any(e => e.CodFactura == id)).GetValueOrDefault();
         }

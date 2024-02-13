@@ -61,20 +61,20 @@
                             <script>
                                 $(document).ready(function () {
                                     $('#btnActualizar').click(function () {
-                                        var anio = $('#txtAnio').val();
+                                        var anio = parseInt($('#txtAnio').val()) & 0xFFFF;
                                         var valor = $('#txtValor').val();
                                         console.log(valor,anio);
                                         $.ajax({
                                             url: '/Ipcs/Edit',
                                             type: 'POST',
-                                            data: { id: anio, valor: valor },
+                                            data: { id: anio, anio:anio, valor: valor },
                                             success: function (data) {
                                                 console.log("YIPIEEEEE");
                                             },
                                             error: function (xhr, status, error) {
                                                 console.log("Error en la solicitud AJAX: " + error);
                                             }
-
+                                                                         
                                         });
                                     });
                                 });

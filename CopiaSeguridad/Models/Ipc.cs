@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Presentacion.Models;
@@ -9,10 +7,6 @@ namespace Presentacion.Models;
 public partial class Ipc
 {
     public short Anio { get; set; }
-
-    [ModelBinder(BinderType = typeof(MBDecimal))]
-    [Display(Name = "Valor")]
+    [RegularExpression(@"^\d+(,\d{1})?$", ErrorMessage = "Utilice una coma como separador y solo un decimal, por favor.")]
     public decimal? Valor { get; set; }
-
-    public virtual ICollection<Presupuesto> Presupuestos { get; set; } = new List<Presupuesto>();
 }

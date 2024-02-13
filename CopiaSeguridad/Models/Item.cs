@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Presentacion.Models;
 
 public partial class Item
 {
-    public string CodItem { get; set; } = null!;
+    public short CodItem { get; set; }
 
     public string? DescItem { get; set; }
 

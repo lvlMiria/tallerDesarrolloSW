@@ -56,7 +56,7 @@
                             $(document).ready(function () {
                                 $('#btnAdelante').click(function () {
                                     var separar = $('#nombre_item').val().split("-");
-                                    var codActual = separar[0].trim();
+                                    var codActual = (parseInt(separar[0].trim(), 10)) & 0xFFFF;
                                     $.ajax({
                                         url: '/Items/RegistroSiguiente',
                                         type: 'GET',
@@ -92,7 +92,7 @@
                             $(document).ready(function () {
                                 $('#btnAtras').click(function () {
                                     var separar = $('#nombre_item').val().split("-");
-                                    var codActual = separar[0].trim();
+                                    var codActual = (parseInt(separar[0].trim(), 10)) & 0xFFFF;
                                     $.ajax({
                                         url: '/Items/RegistroAnterior',
                                         type: 'GET',
@@ -129,7 +129,7 @@
                             $(document).ready(function () {
                                 $('#btnGrabar').click(function () {
                                     var separar = $('#nombre_item').val().split("-");
-                                    var codItem = separar[0].trim();
+                                    var codItem = (parseInt(separar[0].trim(), 10)) & 0xFFFF;
                                     var descItem = separar[1].trim();
                                     var gastoInv = $('input[name="rdbGastoInv"]:checked').val();
                                     var contNuevo = $('input[name="rdbContNuevo"]:checked').val();
@@ -140,7 +140,7 @@
                                     $.ajax({
                                         url: '/Items/Edit',
                                         type: 'POST',
-                                        data: { codItem: codItem, descItem: descItem, gastoInversion: gastoInv, contNuevo: contNuevo, codConcepto: codConcepto, estado: estado },
+                                        data: { id:codItem, codItem: codItem, descItem: descItem, gastoInversion: gastoInv, contNuevo: contNuevo, codConcepto: codConcepto, estado: estado },
                                         success: function (data) {
                                             console.log("YIPIEEEEE");
                                             //Lanza el modal de éxito

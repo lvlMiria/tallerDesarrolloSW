@@ -30,9 +30,8 @@ public partial class SistPresupuestosContext : DbContext
     public virtual DbSet<TipoCambio> TipoCambios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=COV-NB-003\\SQLEXPRESS;Database=sist_presupuestos;Trusted_Connection=True;Encrypt=False");
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:Conexion");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=COV-NB-003\\SQLEXPRESS;Database=sist_presupuestos;Trusted_Connection=True;Encrypt=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,22 +50,15 @@ public partial class SistPresupuestosContext : DbContext
 
         modelBuilder.Entity<ControlFactura>(entity =>
         {
-            entity.HasKey(e => e.CodControl).HasName("PK__CONTROL___A43CFC27813B8B78");
+            entity.HasKey(e => e.CodControl).HasName("PK__CONTROL___A43CFC27F21A5525");
 
             entity.ToTable("CONTROL_FACTURA");
 
             entity.Property(e => e.CodControl)
-                .HasMaxLength(10)
-                .IsUnicode(false)
+                .ValueGeneratedNever()
                 .HasColumnName("cod_control");
-            entity.Property(e => e.CodFactura)
-                .HasMaxLength(6)
-                .IsUnicode(false)
-                .HasColumnName("cod_factura");
-            entity.Property(e => e.CodPresupuesto)
-                .HasMaxLength(6)
-                .IsUnicode(false)
-                .HasColumnName("cod_presupuesto");
+            entity.Property(e => e.CodFactura).HasColumnName("cod_factura");
+            entity.Property(e => e.CodPresupuesto).HasColumnName("cod_presupuesto");
             entity.Property(e => e.Comentario)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -84,22 +76,21 @@ public partial class SistPresupuestosContext : DbContext
 
             entity.HasOne(d => d.CodFacturaNavigation).WithMany(p => p.ControlFacturas)
                 .HasForeignKey(d => d.CodFactura)
-                .HasConstraintName("FK__CONTROL_F__cod_f__09A971A2");
+                .HasConstraintName("FK__CONTROL_F__cod_f__5D95E53A");
 
             entity.HasOne(d => d.CodPresupuestoNavigation).WithMany(p => p.ControlFacturas)
                 .HasForeignKey(d => d.CodPresupuesto)
-                .HasConstraintName("FK__CONTROL_F__cod_p__08B54D69");
+                .HasConstraintName("FK__CONTROL_F__cod_p__5CA1C101");
         });
 
         modelBuilder.Entity<Factura>(entity =>
         {
-            entity.HasKey(e => e.CodFactura).HasName("PK__FACTURA__94EEA41044178253");
+            entity.HasKey(e => e.CodFactura).HasName("PK__FACTURA__94EEA4103A5AF8BB");
 
             entity.ToTable("FACTURA");
 
             entity.Property(e => e.CodFactura)
-                .HasMaxLength(6)
-                .IsUnicode(false)
+                .ValueGeneratedNever()
                 .HasColumnName("cod_factura");
             entity.Property(e => e.AnioContable).HasColumnName("anio_contable");
             entity.Property(e => e.Empresa)
@@ -115,12 +106,12 @@ public partial class SistPresupuestosContext : DbContext
 
             entity.HasOne(d => d.TipoCambio).WithMany(p => p.Facturas)
                 .HasForeignKey(d => new { d.MesContable, d.AnioContable })
-                .HasConstraintName("FK__FACTURA__6754599E");
+                .HasConstraintName("FK__FACTURA__59C55456");
         });
 
         modelBuilder.Entity<Ipc>(entity =>
         {
-            entity.HasKey(e => e.Anio).HasName("PK__IPC__61B22F47AAA237D0");
+            entity.HasKey(e => e.Anio).HasName("PK__IPC__61B22F4730306A86");
 
             entity.ToTable("IPC");
 
@@ -128,20 +119,18 @@ public partial class SistPresupuestosContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("anio");
             entity.Property(e => e.Valor)
-                .HasColumnType("decimal(8, 2)")
+                .HasColumnType("decimal(6, 1)")
                 .HasColumnName("valor");
         });
 
         modelBuilder.Entity<Item>(entity =>
         {
-            entity.HasKey(e => e.CodItem).HasName("PK__ITEM__0317CA76497138A8");
+            entity.HasKey(e => e.CodItem).HasName("PK__ITEM__0317CA76F027CDEA");
 
             entity.ToTable("ITEM");
 
             entity.Property(e => e.CodItem)
-                .HasMaxLength(5)
-                .IsUnicode(false)
-                .IsFixedLength()
+                .ValueGeneratedNever()
                 .HasColumnName("cod_item");
             entity.Property(e => e.CodConcepto).HasColumnName("cod_concepto");
             entity.Property(e => e.ContNuevo)
@@ -160,40 +149,31 @@ public partial class SistPresupuestosContext : DbContext
 
             entity.HasOne(d => d.CodConceptoNavigation).WithMany(p => p.Items)
                 .HasForeignKey(d => d.CodConcepto)
-                .HasConstraintName("FK__ITEM__cod_concep__5FB337D6");
+                .HasConstraintName("FK__ITEM__cod_concep__40F9A68C");
         });
 
         modelBuilder.Entity<Presupuesto>(entity =>
         {
-            entity.HasKey(e => e.CodPresupuesto).HasName("PK__PRESUPUE__D67DB3395FD4A489");
+            entity.HasKey(e => e.CodPresupuesto).HasName("PK__PRESUPUE__D67DB33950EA9A01");
 
             entity.ToTable("PRESUPUESTO");
 
             entity.Property(e => e.CodPresupuesto)
-                .HasMaxLength(6)
-                .IsUnicode(false)
+                .ValueGeneratedNever()
                 .HasColumnName("cod_presupuesto");
             entity.Property(e => e.Anio).HasColumnName("anio");
-            entity.Property(e => e.CodItem)
-                .HasMaxLength(5)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("cod_item");
+            entity.Property(e => e.CodItem).HasColumnName("cod_item");
             entity.Property(e => e.Mes).HasColumnName("mes");
             entity.Property(e => e.PresupuestoMes).HasColumnName("presupuesto_mes");
 
-            entity.HasOne(d => d.AnioNavigation).WithMany(p => p.Presupuestos)
-                .HasForeignKey(d => d.Anio)
-                .HasConstraintName("FK__PRESUPUEST__anio__05D8E0BE");
-
             entity.HasOne(d => d.CodItemNavigation).WithMany(p => p.Presupuestos)
                 .HasForeignKey(d => d.CodItem)
-                .HasConstraintName("FK__PRESUPUES__cod_i__04E4BC85");
+                .HasConstraintName("FK__PRESUPUES__cod_i__531856C7");
         });
 
         modelBuilder.Entity<TipoCambio>(entity =>
         {
-            entity.HasKey(e => new { e.Mes, e.Anio }).HasName("PK__TIPO_CAM__B94B33AE856F80B5");
+            entity.HasKey(e => new { e.Mes, e.Anio }).HasName("PK__TIPO_CAM__B94B33AE271E5509");
 
             entity.ToTable("TIPO_CAMBIO");
 

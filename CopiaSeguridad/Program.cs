@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Presentacion.Models;
 using System.Globalization;
@@ -11,16 +12,26 @@ builder.Services.AddDbContext<SistPresupuestosContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion"))
         .EnableSensitiveDataLogging()); //Quitar luego
 
-//var infoCultura = new CultureInfo("es-ES");
-//infoCultura.NumberFormat.NumberDecimalSeparator = ",";
-//builder.Services.Configure<RequestLocalizationOptions>(options =>
-//{
-//    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(infoCultura);
-//    options.SupportedCultures = new List<CultureInfo> { infoCultura };
-//    options.SupportedUICultures = new List<CultureInfo> { infoCultura };
-//});
-
 var app = builder.Build();
+
+var cultureInfo = new CultureInfo("es-ES");
+cultureInfo.NumberFormat.NumberDecimalSeparator = ",";
+cultureInfo.NumberFormat.NumberGroupSeparator = ".";
+
+var supportedCultures = new[]
+{
+    cultureInfo
+};
+
+var cultureOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("es-ES"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
+
+app.UseRequestLocalization(cultureOptions);
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
