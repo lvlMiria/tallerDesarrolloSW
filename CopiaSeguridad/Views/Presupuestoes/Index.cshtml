@@ -23,7 +23,7 @@
             <div class="col-6">
                 <label for="cboItems" class="form-label">Item</label>
                 <div class="input-group mb-3">
-                    <select class="form-select" aria-label="cboItems">
+                    <select id="cboItem" class="form-select" aria-label="cboItems">
                         <option selected>Seleccionar item</option>
                         @foreach(var item in ViewBag.Items)
                         {
@@ -40,7 +40,7 @@
                 <div class="row m-4">
                 </div>
                 <div class="row">
-                    <p>Concepto: [Inserte Concepto]</p>
+                    <p id="pConcepto">Concepto: </p>
                 </div>
             </div>
         </div>
@@ -48,16 +48,16 @@
         <div class="row m-2">
             @*Continuidad o Nuevo*@
             <div class="col-6">
-                <p>Clasificación: [Inserte Clasificación]</p>
+                <p id="pClasi">Clasificación: </p>
             </div>
             @*Gasto o inversión*@
             <div class="col-6">
-                <p>Tipo: [Inserte Tipo]</p>
+                <p id="pTipo">Tipo: </p>
             </div>
         </div>
 
         <div class="row m-2">
-            <p style="font-weight:bold">IPC año anterior: [IPC%]</p>
+            <p id="pIPC" style="font-weight:bold">IPC año anterior: </p>
         </div>
 
         <div class="row m-2">
@@ -80,34 +80,30 @@
             <div class="row m-2">
                 <div class="col-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="{{i}}" id="chkMes">
-                        @*Hacer arreglo de meses e ir mostrando respecto al índice*@
-                        @if (i == 1)
-                        {
-                            <label class="form-check-label" for="chkMes">Enero</label>
-                        }
+                        <input class="form-check-input" type="checkbox" value="{{i}}" id="chk+@ViewBag.Meses[i-1]">
+                        <label class="form-check-label" for="chk+@ViewBag.Meses[i-1]">@ViewBag.MesesLetras[i - 1]</label>
                     </div>
                 </div>
 
                 @*Presupuesto mensual*@
                 <div class="col-3">
-                    <input class="form-control" type="text" placeholder="Monto en pesos chilenos" aria-label="txtPresupuesto">
+                    <input id="txtPresupuesto+@ViewBag.Meses[i - 1]" class="form-control" type="text" placeholder="Monto en pesos chilenos" aria-label="txtPresupuestoMes">
                 </div>
 
                 @*Gasto real (acumulado)*@
                 <div class="col-3">
-                    <input class="form-control" type="text" value="" aria-label="txtGastoReal" disabled readonly>
+                    <input id="txtGastoReal+@ViewBag.Meses[i - 1]" class="form-control" type="text" aria-label="txtGastoReal" readonly>
                 </div>
                 @*Gasto real año anterior*@
                 <div class="col-4">
-                    <input class="form-control" type="text" value="" aria-label="txtGastoAnterior" disabled readonly>
+                    <input id="txtGastoAnterior+@ViewBag.Meses[i - 1]" class="form-control" type="text" aria-label="txtGastoAnterior" readonly>
                 </div>
             </div>
         }
 
         <div class="row m-2">
-            <label for="txtAnioAnterior" class="form-label">Anual</label>
-            <input class="form-control" type="text" value="" aria-label="txtAnioAnterior" disabled readonly>
+            <label for="txtAnual" class="form-label">Anual</label>
+            <input id="txtAnual" class="form-control" type="text" aria-label="txtAnual" readonly>
         </div>
 
         @*Botones*@
@@ -126,7 +122,7 @@
             <div class="col-12 col-md-4">
                 <div class="m-2">
                     <div class="d-grid gap-2">
-                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
+                        <button id="btnNuevo" type="button" style=" background-color: forestgreen; color: white;" class="btn">Nuevo</button>
                     </div>
                 </div>
             </div>
@@ -134,7 +130,7 @@
             <div class="col-12 col-md-4">
                 <div class="m-2">
                     <div class="d-grid gap-2">
-                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                        <button id="btnGrabar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
                     </div>
                 </div>
             </div>
@@ -144,6 +140,212 @@
     </div>
 
 </div>
+
+@section scripts{
+    <script>
+        //Copie y pegue lo de facturas. Hay que reemplazae con los datos de aqui
+        document.addEventListener("DOMContentLoaded", function () {
+            var cboItems = document.getElementById("cboItems");
+            var pConcepto = document.getElementById("pConcepto");
+            var pTipo = document.getElementById("pTipo");
+            var pClasi = document.getElementById('pClasi');
+            var pIPC = document.getElementById("pIPC");
+            var txtAnual = document.getElementById("txtAnual");
+            //faltan txt presupuestos. Con for se podra? Sino, va a ser bastante codigo
+
+            var presupuestos = [];
+
+            // Obtener los números de factura correspondientes al item seleccionado
+            cboItems.addEventListener("change", function () {
+                var itemSeleccionado = cboItems.value;
+                $.ajax({
+                    url: '/Presupuestoes/ObtenerPresupuestos',
+                    type: 'GET',
+                    data: { codItem: itemSeleccionado },
+                    success: function (data) {
+                        presupuestos = data;
+                        if (presupuestos.length > 0) {
+                            //De aqui en adelante todo es de facturas. Hay que reemplazar
+                            nFactura.value = facturas[0].numFactura;
+                            txtMonto.value = facturas[0].monto;
+                            txtMes.value = facturas[0].mesContable;
+                            txtAnio.value = facturas[0].anioContable;
+
+                            for (var i = 0; i < cboEmpresa.options.length; i++) {
+                                if (cboEmpresa.options[i].value === facturas[0].empresa) {
+                                    cboEmpresa.options[i].selected = true;
+                                }
+                            }
+
+                        } else {
+                            txtAnual.value = "No hay presupuestos disponibles";
+                        }
+                    },
+                });
+
+            });
+
+            // Adelante
+            var indexActual = -1;
+            document.getElementById("btnAdelante").addEventListener("click", function () {
+                //Si hay facturas
+                if (facturas.length > 0) {
+                    // var indexActual = facturas.indexOf(nFactura.value);
+
+                    //Revisar en cual factura estoy
+                    for (var i = 0; i < facturas.length; i++) {
+                        if (facturas[i].numFactura === nFactura.value) {
+                            indexActual = i;
+                            break;
+                        }
+                    }
+                    //Y fijar la siguiente
+                    var sigIndex = (indexActual + 1) % facturas.length;
+
+                    //Asignar valores al resto de los campos
+                    txtCodFactura.value = facturas[sigIndex].codFactura;
+
+                    nFactura.value = facturas[sigIndex].numFactura;
+                    txtMonto.value = facturas[sigIndex].monto;
+                    txtMes.value = facturas[sigIndex].mesContable;
+                    txtAnio.value = facturas[sigIndex].anioContable;
+
+                    //cboEmpresa
+                    for (var i = 0; i < cboEmpresa.options.length; i++) {
+                        if (cboEmpresa.options[i].value === facturas[sigIndex].empresa) {
+                            cboEmpresa.options[i].selected = true;
+                        }
+                    }
+
+                    var controlElem = document.getElementById("control");
+                    var controlDatos = controlElem.getAttribute("data-items");
+                    var controlF = JSON.parse(controlDatos);
+                    var controlItems = controlF.$values;
+
+                    //Si encuentra el codFactura en controlFactura, captura sus datos
+                    for (var i = 0; i < controlItems.length; i++) {
+                        if (controlItems[i].CodFactura === facturas[sigIndex].codFactura) {
+                            txtCodControl.value = controlItems[i].CodControl;
+                            txtCodPresupuesto.value = controlItems[i].CodPresupuesto;
+
+                            //Formatear fecha
+                            fechaR = new Date(controlItems[i].FechaRecepcion);
+                            var fechaE = new Date(controlItems[i].FechaEntrega);
+
+                            var anioR = fechaR.getFullYear();
+                            var mesR = ("0" + (fechaR.getMonth() + 1)).slice(-2);
+                            var diaR = ("0" + fechaR.getDate()).slice(-2);
+                            var anioE = fechaE.getFullYear();
+                            var mesE = ("0" + (fechaE.getMonth() + 1)).slice(-2);
+                            var diaE = ("0" + fechaE.getDate()).slice(-2);
+
+                            var fechaFormatR = anioR + "-" + mesR + "-" + diaR;
+                            var fechaFormatE = anioE + "-" + mesE + "-" + diaE;
+                            //Asignar valores a campos fecha recepción y entrega
+                            dtRecepcion.value = fechaFormatR;
+                            dtEntrega.value = fechaFormatE;
+
+                            //Origen
+                            if (controlItems[i].Origen === "contrato") {
+                                $('#rdbContrato').prop('checked', true);
+                            } else {
+                                $('#rdbSIT').prop('checked', true);
+                                //Separa y almacena el número
+                                var separarSIT = controlItems[i].Origen.split("-");
+                                txtSIT.value = separarSIT[1];
+                            }
+
+                            //Comentario
+                            txtComentario.value = controlItems[i].Comentario;
+                        }
+                    }
+                }
+            });
+
+            // Atras
+            var indexActual = -1;
+            document.getElementById("btnAtras").addEventListener("click", function () {
+                //Si hay facturas
+                if (facturas.length > 0) {
+
+                    //Revisar en cual factura estoy
+                    for (var i = 0; i < facturas.length; i++) {
+                        if (facturas[i].numFactura === nFactura.value) {
+                            indexActual = i;
+                            break;
+                        }
+                    }
+                    //Y fijar la anterior
+                    if (indexActual != 0) {
+                        var antIndex = indexActual - 1;
+                    } else {
+                        var antIndex = facturas.length - 1;
+                    }
+
+                    //Asignar valores al resto de los campos
+                    txtCodFactura.value = facturas[antIndex].codFactura;
+
+                    nFactura.value = facturas[antIndex].numFactura;
+                    txtMonto.value = facturas[antIndex].monto;
+                    txtMes.value = facturas[antIndex].mesContable;
+                    txtAnio.value = facturas[antIndex].anioContable;
+
+                    //cboEmpresa
+                    for (var i = 0; i < cboEmpresa.options.length; i++) {
+                        if (cboEmpresa.options[i].value === facturas[antIndex].empresa) {
+                            cboEmpresa.options[i].selected = true;
+                        }
+                    }
+
+                    var controlElem = document.getElementById("control");
+                    var controlDatos = controlElem.getAttribute("data-items");
+                    var controlF = JSON.parse(controlDatos);
+                    var controlItems = controlF.$values;
+
+                    //Si encuentra el codFactura en controlFactura, captura sus datos
+                    for (var i = 0; i < controlItems.length; i++) {
+                        if (controlItems[i].CodFactura === facturas[antIndex].codFactura) {
+                            txtCodControl.value = controlItems[i].CodControl;
+                            txtCodPresupuesto.value = controlItems[i].CodPresupuesto;
+
+                            //Formatear fecha
+                            fechaR = new Date(controlItems[i].FechaRecepcion);
+                            var fechaE = new Date(controlItems[i].FechaEntrega);
+
+                            var anioR = fechaR.getFullYear();
+                            var mesR = ("0" + (fechaR.getMonth() + 1)).slice(-2);
+                            var diaR = ("0" + fechaR.getDate()).slice(-2);
+                            var anioE = fechaE.getFullYear();
+                            var mesE = ("0" + (fechaE.getMonth() + 1)).slice(-2);
+                            var diaE = ("0" + fechaE.getDate()).slice(-2);
+
+                            var fechaFormatR = anioR + "-" + mesR + "-" + diaR;
+                            var fechaFormatE = anioE + "-" + mesE + "-" + diaE;
+                            //Asignar valores a campos fecha recepción y entrega
+                            dtRecepcion.value = fechaFormatR;
+                            dtEntrega.value = fechaFormatE;
+
+                            //Origen
+                            if (controlItems[i].Origen === "contrato") {
+                                $('#rdbContrato').prop('checked', true);
+                            } else {
+                                $('#rdbSIT').prop('checked', true);
+                                //Separa y almacena el número
+                                var separarSIT = controlItems[i].Origen.split("-");
+                                txtSIT.value = separarSIT[1];
+                            }
+
+                            //Comentario
+                            txtComentario.value = controlItems[i].Comentario;
+                        }
+                    }
+
+
+                }
+            });
+        });
+    </script>
+}
 
 @*=================== Original ====================== 
 <p>

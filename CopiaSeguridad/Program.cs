@@ -12,6 +12,8 @@ builder.Services.AddDbContext<SistPresupuestosContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion"))
         .EnableSensitiveDataLogging()); //Quitar luego
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 var cultureInfo = new CultureInfo("es-ES");

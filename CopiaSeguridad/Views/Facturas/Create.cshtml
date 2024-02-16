@@ -19,7 +19,7 @@
                 @*Item*@
                 <label for="cboItems" class="form-label">Item</label>
                 <div class="input-group mb-3">
-                    <select @* asp-for="CodItem" *@ class="form-select" aria-label="cboItems" id="cboItems">
+                    <select name= "codItem" class="form-select" aria-label="cboItems" id="cboItems">
                         @foreach (var item in ViewBag.Items)
                         {
                             <option value="@item.CodItem">@item.DescItem</option>
@@ -60,12 +60,12 @@
 
             <div class="row m-3">
                 <label for="dtRecepcion">Fecha de Recepción</label>
-                <input @* asp-for="FechaRecepcion" *@ id="dtRecepcion" class="form-control" type="date" />
+                <input name="fechaRecepcion" id="dtRecepcion" class="form-control" type="date" />
             </div>
 
             <div class="row m-3">
                 <label for="dtEntrega">Fecha de Entrega</label>
-                <input @* asp-for="FechaEntrega" *@ id="dtEntrega" class="form-control" type="date" />
+                <input name="fechaEntrega" id="dtEntrega" class="form-control" type="date" />
             </div>
 
             @*Mes y año contable*@
@@ -73,14 +73,14 @@
                 <div class="col-6">
                     <label for="txtMes">Mes Contable</label>
                     <div class="input-group mb-3">
-                        <input asp-for="MesContable" type="text" class="form-control" aria-label="txtMes">
+                        <input asp-for="MesContable" type="text" class="form-control" id="txtMes">
                     </div>
                     <span asp-validation-for="CodFactura" class="text-danger"></span>
                 </div>
                 <div class="col-6">
                     <label for="txtAnio">Año Contable</label>
                     <div class="input-group mb-3">
-                        <input asp-for="AnioContable" type="text" class="form-control" aria-label="txtAnio">
+                        <input asp-for="AnioContable" type="text" class="form-control" id="txtAnio">
                     </div>
                     <span asp-validation-for="CodFactura" class="text-danger"></span>
                 </div>
@@ -91,23 +91,34 @@
                 <p>Origen</p>
                 <div class="col-6">
                     <div class="form-check">
-                        <input @* asp-for="Origen" *@ class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbContrato">
-                        <label class="form-check-label" for="rdbContrato">
-                            Contrato
-                        </label>
+                        @*ARREGLAR VISUAL*@
+                        <div class="row">
+                            <div class="col-6">
+                                <div>
+                                    Contrato <input value="contrato" name="origen" onchange="habilitarInput()" class="form-check-input" type="radio" id="rdbContrato" />
+
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div>
+                                    SIT <input value="sit" name="origen" onchange="habilitarInput()" class="form-check-input" type="radio" id="rdbSIT" />
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input name="textoSit" type="text" value="sit-" class="form-control" id="txtSIT">
+                                </div>
+                            </div>
+
+                        </div>
+                        
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="rdbContratoSIT" id="rdbSIT">
-                        <label class="form-check-label" for="rdbSIT">
-                            SIT
-                        </label>
-                    </div>
-                    <div class="input-group mb-3">
-                        @*If SIT seleccionado, activar*@
-                        <input @* asp-for="Origen" *@ type="text" value="sit-" class="form-control" aria-label="txtSIT">
-                    </div>
+            </div>
+
+            @*Comentario*@
+            <div class="row m-1">
+                <label for="txtComentario" class="form-label">Comentario</label>
+                <div class="input-group mb-3">
+                    <input name="comentario" type="text" class="form-control" id="txtComentario">
                 </div>
             </div>
 
@@ -127,7 +138,7 @@
                 <div class="col-12 col-md-4">
                     <div class="m-2">
                         <div class="d-grid gap-2">
-                            <button type="submit" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                            <button id="btnGrabar" type="submit" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
                         </div>
                     </div>
                 </div>
@@ -139,50 +150,47 @@
 
 </div>
 
-@* 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="CodFactura" class="control-label"></label>
-                <input asp-for="CodFactura" class="form-control" />
-                <span asp-validation-for="CodFactura" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NumFactura" class="control-label"></label>
-                <input asp-for="NumFactura" class="form-control" />
-                <span asp-validation-for="NumFactura" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Monto" class="control-label"></label>
-                <input asp-for="Monto" class="form-control" />
-                <span asp-validation-for="Monto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MesContable" class="control-label"></label>
-                <select asp-for="MesContable" class ="form-control" asp-items="ViewBag.MesContable"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="AnioContable" class="control-label"></label>
-                <select asp-for="AnioContable" class ="form-control" asp-items="ViewBag.AnioContable"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="Empresa" class="control-label"></label>
-                <input asp-for="Empresa" class="form-control" />
-                <span asp-validation-for="Empresa" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div> *@
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        //Si rdbContrato está seleccionado, se desactiva el txtSIT
+        function habilitarInput() {
+            var rdbContrato = document.getElementById("rdbContrato");
+            var rdbSIT = document.getElementById("rdbSIT");
+            var txtSitInput = document.getElementById("txtSIT");
+
+            if (rdbContrato.checked) {
+                txtSitInput.disabled = true;
+            }
+            if (rdbSIT.checked) {
+                txtSitInput.disabled = false;
+            }
+        }
+    </script>
+    <script>
+        document.getElementById("btnGrabar").addEventListener("click", function () {
+            var txtSIT = document.getElementById("txtSIT").value;
+            var txtComentario = document.getElementById("txtComentario").value;
+            var rdbOrigen = $('input[name="origen"]:checked').val();
+            var dtRecepcion = $('#dtRecepcion').val();
+            var dtEntrega = $('#dtEntrega').val();
+
+            var cboItems = document.getElementById("cboItems").value;
+            cboItems = parseInt(cboItems, 10) & 0xFFFF;
+            var txtAnio = document.getElementById('txtAnio').value;
+            txtAnio = parseInt(txtAnio, 10) & 0xFFFF;
+
+            $.ajax({
+                url: '/ControlFacturas/Create',
+                type: 'POST',
+                data: { textoSIT: txtSIT, codItem: cboItems, anio: txtAnio, codControl: 1, codPresupuesto: 1, codFactura: 1, origen: rdbOrigen, fechaRecepcion: dtRecepcion, fechaEntrega: dtEntrega, comentario: txtComentario },
+                //SI DEJA DE FUNCIONAR, PUEDE SER PQ COMENTÉ ESTO
+                // success: function (data) {
+                //     console.log("YIPIEEEEEEE");
+
+                // },
+            });
+        });
+    </script>
 }

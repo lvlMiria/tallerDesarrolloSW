@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Presentacion.Models;
+
 
 namespace Presentacion.Controllers
 {
@@ -13,11 +15,13 @@ namespace Presentacion.Controllers
     {
         private readonly SistPresupuestosContext _context;
         private readonly ILogger<FacturasController> _logger;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public FacturasController(SistPresupuestosContext context, ILogger<FacturasController> logger)
+        public FacturasController(SistPresupuestosContext context, ILogger<FacturasController> logger, IHttpClientFactory clientFactory)
         {
             _context = context;
             _logger = logger;
+            _clientFactory = clientFactory;
         }
 
         // GET: Facturas
@@ -29,15 +33,7 @@ namespace Presentacion.Controllers
             var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
 
-            //Primer item de la tabla
-            var primerItemF = _context.Facturas.FirstOrDefault();
-            ViewBag.Factura = primerItemF;
-
-            var primerItemCF = await _context.ControlFacturas.FirstOrDefaultAsync(cf => cf.CodFactura == primerItemF.CodFactura);
-            ViewBag.Control = primerItemCF;
-
-            var primerItemP = await _context.Presupuestos.FirstOrDefaultAsync(p => p.CodPresupuesto == primerItemCF.CodPresupuesto);
-            ViewBag.Presupuestos = primerItemP;
+            ViewBag.Control = await _context.ControlFacturas.ToListAsync();
 
             return View(await sistPresupuestosContext.ToListAsync());
         }
@@ -46,13 +42,10 @@ namespace Presentacion.Controllers
         {
             var facturas = await _context.Facturas
                 .Where(f => f.ControlFacturas.Any(cf => cf.CodPresupuestoNavigation.CodItem == codItem))
-                .Select(f => f.NumFactura)
                 .ToListAsync();
 
             return Json(facturas);
         }
-
-
 
         // GET: Lista de Facturas
         public async Task<IActionResult> ListaFacturas()
@@ -105,54 +98,56 @@ namespace Presentacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CodFactura,NumFactura,Monto,MesContable,AnioContable,Empresa")] Factura factura)
         {
-            //Se busca el último CodControl
-            var ultimoCodControl = _context.ControlFacturas.OrderByDescending(cf => cf.CodControl).FirstOrDefault();
-            if (ultimoCodControl != null) {
-
-                //Se transforma a int para sumarle uno, luego a string y se le agregan los 0 necesarios para dejarlo de 6 cifras
-                int nuevoCodControl = ultimoCodControl.CodControl +1;
-
-                if (ModelState.IsValid)
-                {
-                    var control = new ControlFactura()
-                    {
-                       CodControl = nuevoCodControl,
+            //Se busca el último CodFactura
+            var ultimoCodFactura = _context.Facturas.OrderByDescending(f => f.CodFactura).Select(f => f.CodFactura).FirstOrDefault();
 
 
-                    };
+            if (ModelState.IsValid)
+            {
+                factura.CodFactura = ultimoCodFactura+1;
 
-                    _context.Add(factura);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
+                _context.Add(factura);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+
             }
-            
-            ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
-            return View(factura);
+            else
+            {
+                var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                    .Select(e => e.ErrorMessage)
+                                    .ToList();
+                foreach(var error in errores)
+                {
+                    _logger.LogInformation(error);
+                }
+
+                ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
+                return View(factura);
+            }
         }
 
         // GET: Facturas/Edit/5
-        public async Task<IActionResult> Edit(int id)
-        {
-            if (id == null || _context.Facturas == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Edit(int id)
+        //{
+        //    if (id == null || _context.Facturas == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var factura = await _context.Facturas.FindAsync(id);
-            if (factura == null)
-            {
-                return NotFound();
-            }
-            ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
-            return View(factura);
-        }
+        //    var factura = await _context.Facturas.FindAsync(id);
+        //    if (factura == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
+        //    return View(factura);
+        //}
 
         // POST: Facturas/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[ValidateAntiForgeryToken]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("CodFactura,NumFactura,Monto,MesContable,AnioContable,Empresa")] Factura factura)
         {
             if (id != factura.CodFactura)
@@ -178,7 +173,8 @@ namespace Presentacion.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
+                return View(factura);
             }
             ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
             return View(factura);

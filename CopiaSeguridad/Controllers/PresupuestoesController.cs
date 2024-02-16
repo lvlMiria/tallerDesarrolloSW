@@ -31,11 +31,43 @@ namespace Presentacion.Controllers
             var facturas = await _context.Facturas.ToListAsync();
             ViewBag.Facturas = facturas;
 
+            List<int> meses = new List<int>();
+            for(int i = 1; i < 13; i++)
+            {
+                meses.Add(i);
+            }
+            ViewBag.Meses = meses;
+
+            List<string> mesesLetras = new List<string>();
+            mesesLetras.Add("Enero");
+            mesesLetras.Add("Febrero");
+            mesesLetras.Add("Marzo");
+            mesesLetras.Add("Abril");
+            mesesLetras.Add("Mayo");
+            mesesLetras.Add("Junio");
+            mesesLetras.Add("Julio");
+            mesesLetras.Add("Agosto");
+            mesesLetras.Add("Septiembre");
+            mesesLetras.Add("Octubre");
+            mesesLetras.Add("Noviembre");
+            mesesLetras.Add("Diciembre");
+            ViewBag.MesesLetras = mesesLetras;
+
             int mesActual = DateTime.Now.Month;
             ViewBag.Presupuestos = _context.Presupuestos.Where(p => p.Mes == mesActual).ToList();
 
             return View();
             
+        }
+
+        //Obtener presupuestos a partir del item
+        public async Task<IActionResult> ObtenerPresupuestos(Int16 codItem)
+        {
+            var presupuestos = await _context.Presupuestos
+                .Where(p => p.CodItem == codItem)
+                .ToListAsync();
+
+            return Json(presupuestos);
         }
 
         // GET: Lista de Presupuestos
