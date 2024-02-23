@@ -31,7 +31,7 @@ public partial class SistPresupuestosContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=COV-NB-003\\SQLEXPRESS;Database=sist_presupuestos;Trusted_Connection=True;Encrypt=False;");
+        => optionsBuilder.UseSqlServer("Server=COV-NB-003\\SQLEXPRESS;Database=sist_presupuestos;Trusted_Connection=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,7 +50,7 @@ public partial class SistPresupuestosContext : DbContext
 
         modelBuilder.Entity<ControlFactura>(entity =>
         {
-            entity.HasKey(e => e.CodControl).HasName("PK__CONTROL___A43CFC27F21A5525");
+            entity.HasKey(e => e.CodControl).HasName("PK__CONTROL___A43CFC27EC63CC82");
 
             entity.ToTable("CONTROL_FACTURA");
 
@@ -60,7 +60,7 @@ public partial class SistPresupuestosContext : DbContext
             entity.Property(e => e.CodFactura).HasColumnName("cod_factura");
             entity.Property(e => e.CodPresupuesto).HasColumnName("cod_presupuesto");
             entity.Property(e => e.Comentario)
-                .HasMaxLength(50)
+                .HasMaxLength(60)
                 .IsUnicode(false)
                 .HasColumnName("comentario");
             entity.Property(e => e.FechaEntrega)
@@ -76,11 +76,11 @@ public partial class SistPresupuestosContext : DbContext
 
             entity.HasOne(d => d.CodFacturaNavigation).WithMany(p => p.ControlFacturas)
                 .HasForeignKey(d => d.CodFactura)
-                .HasConstraintName("FK__CONTROL_F__cod_f__5D95E53A");
+                .HasConstraintName("FK__CONTROL_F__cod_f__662B2B3B");
 
             entity.HasOne(d => d.CodPresupuestoNavigation).WithMany(p => p.ControlFacturas)
                 .HasForeignKey(d => d.CodPresupuesto)
-                .HasConstraintName("FK__CONTROL_F__cod_p__5CA1C101");
+                .HasConstraintName("FK__CONTROL_F__cod_p__65370702");
         });
 
         modelBuilder.Entity<Factura>(entity =>
@@ -154,13 +154,11 @@ public partial class SistPresupuestosContext : DbContext
 
         modelBuilder.Entity<Presupuesto>(entity =>
         {
-            entity.HasKey(e => e.CodPresupuesto).HasName("PK__PRESUPUE__D67DB33950EA9A01");
+            entity.HasKey(e => e.CodPresupuesto).HasName("PK__PRESUPUE__D67DB339E4509E5F");
 
             entity.ToTable("PRESUPUESTO");
 
-            entity.Property(e => e.CodPresupuesto)
-                .ValueGeneratedNever()
-                .HasColumnName("cod_presupuesto");
+            entity.Property(e => e.CodPresupuesto).HasColumnName("cod_presupuesto");
             entity.Property(e => e.Anio).HasColumnName("anio");
             entity.Property(e => e.CodItem).HasColumnName("cod_item");
             entity.Property(e => e.Mes).HasColumnName("mes");
@@ -168,7 +166,7 @@ public partial class SistPresupuestosContext : DbContext
 
             entity.HasOne(d => d.CodItemNavigation).WithMany(p => p.Presupuestos)
                 .HasForeignKey(d => d.CodItem)
-                .HasConstraintName("FK__PRESUPUES__cod_i__531856C7");
+                .HasConstraintName("FK__PRESUPUES__cod_i__625A9A57");
         });
 
         modelBuilder.Entity<TipoCambio>(entity =>

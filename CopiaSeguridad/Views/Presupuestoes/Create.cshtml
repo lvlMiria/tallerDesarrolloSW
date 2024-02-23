@@ -1,51 +1,287 @@
-﻿@model Presentacion.Models.Presupuesto
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@model Presentacion.Models.Presupuesto
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nuevo Presupuesto";
 }
 
-<h1>Create</h1>
+<div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="d-flex flex-row-reverse">
+        <a asp-action="ListaPresupuestos">
+            Ver Lista <span class="material-icons">arrow_circle_right</span>
+        </a>
+    </div>
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <div class="row">
+            <h3>Presupuestos</h3>
+        </div>
+    </div>
 
-<h4>Presupuesto</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="CodPresupuesto" class="control-label"></label>
-                <input asp-for="CodPresupuesto" class="form-control" />
-                <span asp-validation-for="CodPresupuesto" class="text-danger"></span>
+    <div class="container flex-column justify-content-center" style="width:800px">
+
+        <form asp-action="Create" method="post">
+            <div class="row m-2">
+                @*Item*@
+                <div class="col-6">
+                    <label for="cboItems" class="form-label">Item</label>
+                    <div class="input-group mb-3">
+                        <select id="cboItems" class="form-select" aria-label="cboItems">
+                            <option selected>Seleccionar item</option>
+                            @foreach (var item in ViewBag.Items)
+                            {
+                                @if (item.Estado == 1)
+                                {
+                                    <option value="@item.CodItem">@item.DescItem</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                @*Concepto*@
+                <div class="col-6">
+                    <div class="row m-4">
+                    </div>
+                    <div class="row">
+                        <p id="pConcepto">Concepto: </p>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Mes" class="control-label"></label>
-                <input asp-for="Mes" class="form-control" />
-                <span asp-validation-for="Mes" class="text-danger"></span>
+
+            <div class="row m-2">
+                @*Continuidad o Nuevo*@
+                <div class="col-6">
+                    <p id="pClasi">Clasificación: </p>
+                </div>
+                @*Gasto o inversión*@
+                <div class="col-6">
+                    <p id="pTipo">Tipo: </p>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Anio" class="control-label"></label>
-                <select asp-for="Anio" class ="form-control" asp-items="ViewBag.Anio"></select>
+
+            <div class="row m-2">
+                <p id="pIPC" style="font-weight:bold">IPC año anterior: </p>
             </div>
-            <div class="form-group">
-                <label asp-for="PresupuestoMes" class="control-label"></label>
-                <input asp-for="PresupuestoMes" class="form-control" />
-                <span asp-validation-for="PresupuestoMes" class="text-danger"></span>
+
+            <div class="row m-2">
+                <div class="col-2">
+                    <p style="font-weight:bold">Mes</p>
+                </div>
+                <div class="col-3">
+                    <p style="font-weight:bold">Presupuesto</p>
+                </div>
+                <div class="col-3">
+                    <p style="font-weight:bold">Gasto real</p>
+                </div>
+                <div class="col-4">
+                    <p style="font-weight:bold">Gasto real año pasado</p>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="CodItem" class="control-label"></label>
-                <select asp-for="CodItem" class ="form-control" asp-items="ViewBag.CodItem"></select>
+
+            @for (int i = 1; i < 13; i++)
+            {
+                <div class="row m-2">
+                    <div class="col-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{i}}" id="chk+@ViewBag.Meses[i-1]">
+                            <label class="form-check-label" for="chk+@ViewBag.Meses[i-1]">@ViewBag.MesesLetras[i - 1]</label>
+                        </div>
+                    </div>
+
+                    @*Presupuesto mensual*@
+                    <div class="col-3">
+                        <input id="txtPresupuesto@(ViewBag.Meses[i - 1])" class="form-control" type="text" placeholder="Monto en USD" aria-label="txtPresupuestoMes">
+                    </div>
+
+                    @*Gasto real (acumulado)*@
+                    <div class="col-3">
+                        <input id="txtGastoReal@(ViewBag.Meses[i - 1])" class="form-control" type="text" aria-label="txtGastoReal" readonly>
+                    </div>
+                    @*Gasto real año anterior*@
+                    <div class="col-4">
+                        <input id="txtGastoAnterior@(ViewBag.Meses[i - 1])" class="form-control" type="text" aria-label="txtGastoAnterior" readonly>
+                    </div>
+                </div>
+            }
+            <div class="row m-2">
+                <div class="col-2">
+                    <p style="font-weight:bold">Anual</p>
+                </div>
+                @*Presupuesto Anual*@
+                <div class="col-3">
+                    <input id="txtAnual" class="form-control" type="text" aria-label="txtAnual" readonly>
+                </div>
+
+                @*Gasto real (acumulado)*@
+                <div class="col-3">
+                    <input id="txtAnualGR" class="form-control" type="text" aria-label="txtAnualGR" readonly>
+                </div>
+                @*Gasto real año anterior*@
+                <div class="col-4">
+                    <input id="txtAnualGA" class="form-control" type="text" aria-label="txtAnualGA" readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+
+            @*Botones*@
+            <div class="row" style="margin-top:40px">
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <a asp-action="Index">
+                            <div class="d-grid gap-2">
+                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Volver</button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="m-2">
+                        <div class="d-grid gap-2">
+                            <button id="btnGrabar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Grabar</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </form>
+
+    </div>
+
+</div>
+
+@*MODAL EXITO AL GRABAR*@
+<div class="modal" tabindex="-1" role="dialog" id="modalGrabar">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Presupuesto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Se ha almacenado el nuevo presupuesto.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cerrarModal" type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+@*Estos div son solo para conseguir los viewbag en JS*@
+<div id="concepto" data-items="@JsonSerializer.Serialize(ViewBag.Conceptos, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
+<div id="item" data-items="@JsonSerializer.Serialize(ViewBag.Items, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
+<div id="ipc" data-items="@JsonSerializer.Serialize(ViewBag.Ipcs, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+@section scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //Aqui quedaste
+        $(document).ready(function () {
+            $('#btnGrabar').click(function () {
+                var codItem = parseInt($('#cboItems').val(),10)& 0xFFFF;
+                for (i = 1; i < 13; i++) {
+                    var txtPresupuesto = parseInt($('#txtPresupuesto'+i).val(),10);
+                    var mes = i;
+
+                    console.log(txtPresupuesto);
+                    console.log(mes);
+                    if(txtPresupuesto != null){
+                        $.ajax({
+                            url: '/Presupuestoes/Create',
+                            type: 'POST',
+                            data: { codItem: codItem, mes: mes, presupuesto: txtPresupuesto },
+                            success: function (data) {
+                                console.log("YIPIEEEEE");
+                                //Lanza el modal de éxito
+                                $('#modalGrabar').modal("show");
+                                $('#cerrarModal').click(function () {
+                                    $('#modalGrabar').modal('hide');
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.log("Error en la solicitud AJAX: " + error, xhr, status,);
+                            }
+
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        //Copie y pegue lo de facturas. Hay que reemplazae con los datos de aqui
+        document.addEventListener("DOMContentLoaded", function () {
+            var cboItems = document.getElementById("cboItems");
+            var pConcepto = document.getElementById("pConcepto");
+            var pTipo = document.getElementById("pTipo");
+            var pClasi = document.getElementById('pClasi');
+            var pIPC = document.getElementById("pIPC");
+            var txtAnual = document.getElementById("txtAnual");
+            var txtAnualGR = document.getElementById("txtAnualGR");
+            var txtAnualGA = document.getElementById("txtAnualGA");
+
+            var presupuestos = [];
+            //Conceptos JSON
+            var conceptoElem = document.getElementById("concepto");
+            var conceptoDatos = conceptoElem.getAttribute("data-items");
+            var conceptosJ = JSON.parse(conceptoDatos);
+            var conceptoItems = conceptosJ.$values;
+            //Items JSON
+            var itemElem = document.getElementById("item");
+            var itemDatos = itemElem.getAttribute("data-items");
+            var itemsJ = JSON.parse(itemDatos);
+            var itemItems = itemsJ.$values;
+            //IPC JSON
+            var ipcElem = document.getElementById("ipc");
+            var ipcDatos = ipcElem.getAttribute("data-items");
+            var ipcJ = JSON.parse(ipcDatos);
+            var ipcItems = ipcJ.$values;
+
+            // Obtener los números de factura correspondientes al item seleccionado
+            cboItems.addEventListener("change", function () {
+                var itemSeleccionado = cboItems.value;
+                //Conseguir Item
+                for (i = 0; i < itemItems.length; i++) {
+                    if (itemItems[i].CodItem == itemSeleccionado) {
+                        var item = itemItems[i];
+                    }
+                    //Mostrar concepto
+                    for (j = 0; j < conceptoItems.length; j++) {
+                        if (conceptoItems[j].CodConcepto == item.CodConcepto) {
+                            pConcepto.textContent = "Concepto: " + conceptoItems[i].DescConcepto;
+                        }
+                    }
+                    //Mostrar Clasificación y tipo
+                    pClasi.textContent = "Clasificación: " + item.ContNuevo;
+                    pTipo.textContent = "Tipo: " + item.GastoInversion;
+
+                }
+
+            });
+
+            //Mostrar IPC año anterior
+            var anioAnterior = new Date().getFullYear() - 1;
+            //Flag por si no está el año anterior ingresado
+            var flagIPC = false;
+            for (j = 0; j < ipcItems.length; j++) {
+                if (ipcItems[j].Anio == anioAnterior) {
+                    //Si encuentra el año, activa la flag y muestra el valor
+                    flagIPC = true;
+                    pIPC.textContent = "IPC año anterior: " + ipcItems[j].Valor + "%";
+                }
+            }
+            //Si la flag no fue activada, se muestra un mensaje.
+            if (!flagIPC) {
+                pIPC.textContent = "IPC año anterior no ingresado.";
+            }
+
+        });
+    </script>
 }

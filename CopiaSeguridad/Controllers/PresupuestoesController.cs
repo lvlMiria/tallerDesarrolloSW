@@ -12,18 +12,35 @@ namespace Presentacion.Controllers
     public class PresupuestoesController : Controller
     {
         private readonly SistPresupuestosContext _context;
+        private readonly ILogger<FacturasController> _logger;
 
-        public PresupuestoesController(SistPresupuestosContext context)
+        public PresupuestoesController(SistPresupuestosContext context, ILogger<FacturasController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Presupuestoes
         public async Task<IActionResult> Index()
         {
-           
+            var conceptos = await _context.Conceptos.ToListAsync();
+            ViewBag.Conceptos = conceptos;
+
             var items = await _context.Items.ToListAsync();
             ViewBag.Items = items;
+
+            var ipc = _context.Ipcs.Where(i=>i.Anio == DateTime.Now.Year-1).Select(i=>i.Valor).FirstOrDefault();
+            if (ipc == null)
+            {
+                //No se ha ingresado el valor del año actual
+                ViewBag.Ipcs = "No ingresado";
+            }
+            else
+            {
+                //IPC año pasado
+                ViewBag.Ipcs = ipc;
+            }
+                
 
             var control = await _context.ControlFacturas.ToListAsync();
             ViewBag.Control = control;
@@ -32,7 +49,7 @@ namespace Presentacion.Controllers
             ViewBag.Facturas = facturas;
 
             List<int> meses = new List<int>();
-            for(int i = 1; i < 13; i++)
+            for (int i = 1; i < 13; i++)
             {
                 meses.Add(i);
             }
@@ -53,18 +70,46 @@ namespace Presentacion.Controllers
             mesesLetras.Add("Diciembre");
             ViewBag.MesesLetras = mesesLetras;
 
-            int mesActual = DateTime.Now.Month;
-            ViewBag.Presupuestos = _context.Presupuestos.Where(p => p.Mes == mesActual).ToList();
+            int anioActual = DateTime.Now.Year;
+            ViewBag.Presupuestos = _context.Presupuestos.Where(p => p.Anio == anioActual).ToList();
 
             return View();
-            
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Factura>>> ObtenerFacturasItem(short codItem, int anio)
+        {
+            var facturas = await _context.ControlFacturas
+            .Where(cf => cf.CodPresupuestoNavigation.CodItem == codItem)
+            .Select(cf => cf.CodFacturaNavigation)
+            .ToListAsync();
+
+            facturas = facturas.Where(cf => cf.AnioContable == anio).ToList();
+
+            return Ok(facturas);
+        }
+
+        public int? CLPaUSD(int monto,byte mes)
+        {
+            int anioActual = DateTime.Now.Year;
+            int? mesDolar = _context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anioActual).Select(tc => tc.Valor).FirstOrDefault();
+            if(mesDolar != null)
+            {
+                int? valor = monto / mesDolar;
+                return valor;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         //Obtener presupuestos a partir del item
         public async Task<IActionResult> ObtenerPresupuestos(Int16 codItem)
         {
+            int anioActual = DateTime.Now.Year;
             var presupuestos = await _context.Presupuestos
-                .Where(p => p.CodItem == codItem)
+                .Where(p => p.CodItem == codItem && p.Anio == anioActual)
                 .ToListAsync();
 
             return Json(presupuestos);
@@ -103,30 +148,132 @@ namespace Presentacion.Controllers
         }
 
         // GET: Presupuestoes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var conceptos = await _context.Conceptos.ToListAsync();
+            ViewBag.Conceptos = conceptos;
+
+            var items = await _context.Items.ToListAsync();
+            ViewBag.Items = items;
+
+            var ipc = await _context.Ipcs.ToListAsync();
+            ViewBag.Ipcs = ipc;
+
+            var control = await _context.ControlFacturas.ToListAsync();
+            ViewBag.Control = control;
+
+            var facturas = await _context.Facturas.ToListAsync();
+            ViewBag.Facturas = facturas;
+
+            List<int> meses = new List<int>();
+            for (int i = 1; i < 13; i++)
+            {
+                meses.Add(i);
+            }
+            ViewBag.Meses = meses;
+
+            List<string> mesesLetras = new List<string>();
+            mesesLetras.Add("Enero");
+            mesesLetras.Add("Febrero");
+            mesesLetras.Add("Marzo");
+            mesesLetras.Add("Abril");
+            mesesLetras.Add("Mayo");
+            mesesLetras.Add("Junio");
+            mesesLetras.Add("Julio");
+            mesesLetras.Add("Agosto");
+            mesesLetras.Add("Septiembre");
+            mesesLetras.Add("Octubre");
+            mesesLetras.Add("Noviembre");
+            mesesLetras.Add("Diciembre");
+            ViewBag.MesesLetras = mesesLetras;
+
             ViewData["Anio"] = new SelectList(_context.Ipcs, "Anio", "Anio");
             ViewData["CodItem"] = new SelectList(_context.Items, "CodItem", "CodItem");
             return View();
         }
 
-        // POST: Presupuestoes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CodPresupuesto,Mes,Anio,PresupuestoMes,CodItem")] Presupuesto presupuesto)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(short codItem, byte mes, int presupuesto)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(presupuesto);
+                short anio = (short)(DateTime.Now.Year);
+                Presupuesto nuevoPresupuesto = new Presupuesto
+                {
+                    Mes = mes,
+                    Anio = anio,
+                    CodItem = codItem,
+                    PresupuestoMes = presupuesto
+                };
+
+                _context.Add(nuevoPresupuesto);
                 await _context.SaveChangesAsync();
+
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Anio"] = new SelectList(_context.Ipcs, "Anio", "Anio", presupuesto.Anio);
-            ViewData["CodItem"] = new SelectList(_context.Items, "CodItem", "CodItem", presupuesto.CodItem);
-            return View(presupuesto);
+
+            // Si hay errores de validación, recupera los datos necesarios para el formulario
+            var conceptos = await _context.Conceptos.ToListAsync();
+            ViewBag.Conceptos = conceptos;
+
+            var items = await _context.Items.ToListAsync();
+            ViewBag.Items = items;
+
+            var ipc = await _context.Ipcs.ToListAsync();
+            ViewBag.Ipcs = ipc;
+
+            var control = await _context.ControlFacturas.ToListAsync();
+            ViewBag.Control = control;
+
+            var facturas = await _context.Facturas.ToListAsync();
+            ViewBag.Facturas = facturas;
+
+            List<int> meses = new List<int>();
+            for (int i = 1; i < 13; i++)
+            {
+                meses.Add(i);
+            }
+            ViewBag.Meses = meses;
+
+            List<string> mesesLetras = new List<string>();
+            mesesLetras.Add("Enero");
+            mesesLetras.Add("Febrero");
+            mesesLetras.Add("Marzo");
+            mesesLetras.Add("Abril");
+            mesesLetras.Add("Mayo");
+            mesesLetras.Add("Junio");
+            mesesLetras.Add("Julio");
+            mesesLetras.Add("Agosto");
+            mesesLetras.Add("Septiembre");
+            mesesLetras.Add("Octubre");
+            mesesLetras.Add("Noviembre");
+            mesesLetras.Add("Diciembre");
+            ViewBag.MesesLetras = mesesLetras;
+
+
+            return View();
         }
+
+
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("CodPresupuesto,Mes,Anio,PresupuestoMes,CodItem")] Presupuesto presupuesto)
+        //{
+
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(presupuesto);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["Anio"] = new SelectList(_context.Ipcs, "Anio", "Anio", presupuesto.Anio);
+        //    ViewData["CodItem"] = new SelectList(_context.Items, "CodItem", "CodItem", presupuesto.CodItem);
+        //    return View(presupuesto);
+        //}
 
         // GET: Presupuestoes/Edit/5
         public async Task<IActionResult> Edit(int id)

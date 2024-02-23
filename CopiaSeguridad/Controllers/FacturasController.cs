@@ -126,23 +126,6 @@ namespace Presentacion.Controllers
             }
         }
 
-        // GET: Facturas/Edit/5
-        //public async Task<IActionResult> Edit(int id)
-        //{
-        //    if (id == null || _context.Facturas == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var factura = await _context.Facturas.FindAsync(id);
-        //    if (factura == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewData["MesContable"] = new SelectList(_context.TipoCambios, "Mes", "Mes", factura.MesContable);
-        //    return View(factura);
-        //}
-
         // POST: Facturas/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
