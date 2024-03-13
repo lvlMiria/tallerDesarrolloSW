@@ -28,66 +28,66 @@ namespace Presentacion.Controllers
             return View(await sistPresupuestosContext.ToListAsync());
         }
 
-        // GET: ControlFacturas/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
         // POST: ControlFacturas/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         //[ValidateAntiForgeryToken]
         [HttpPost]
-        public async Task<IActionResult> Create(string textoSIT, Int16 codItem, Int16 anio, [Bind("CodControl,CodPresupuesto,CodFactura,Origen,FechaRecepcion,FechaEntrega,Comentario")] ControlFactura controlFactura)
+        public async Task<IActionResult> Create(short mes, string textoSIT, Int16 codItem, Int16 anio, [Bind("CodControl,CodPresupuesto,CodFactura,Origen,FechaRecepcion,FechaEntrega,Comentario")] ControlFactura controlFactura)
         {
-            //Se busca el último CodFactura
-            var ultimoCodFactura = _context.Facturas.OrderByDescending(f => f.CodFactura).Select(f => f.CodFactura).FirstOrDefault();
-            controlFactura.CodFactura = ultimoCodFactura + 1;
-
-            //Se busca el último CodControl
-            var ultimoCodControl = _context.ControlFacturas.OrderByDescending(cf => cf.CodControl).Select(cf => cf.CodControl).FirstOrDefault();
-            controlFactura.CodControl = ultimoCodControl + 1;
-
-            //Para combinar el sit con su código
-            if (controlFactura.Origen != "contrato")
+            var cambio = _context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anio).FirstOrDefault();
+            if (cambio != null)
             {
-                controlFactura.Origen = textoSIT;
-            }
+                //Se busca el último CodFactura
+                var ultimoCodFactura = _context.Facturas.OrderByDescending(f => f.CodFactura).Select(f => f.CodFactura).FirstOrDefault();
+                controlFactura.CodFactura = ultimoCodFactura + 1;
 
-            //es el codPresupuesto donde esté el codItem seleccionado y año contables
-            //Dejé de considerar año ya que hay casos que no se compra el mismo mes que se presupuestó
-            var codPresupuesto = _context.Presupuestos
-            .Where(p =>
-                    p.CodItem == codItem &&
-                    //p.Mes == factura.MesContable &&
-                    p.Anio == anio)
-                .Select(p => p.CodPresupuesto)
-                .FirstOrDefault();
-            controlFactura.CodPresupuesto = codPresupuesto;
+                //Se busca el último CodControl
+                var ultimoCodControl = _context.ControlFacturas.OrderByDescending(cf => cf.CodControl).Select(cf => cf.CodControl).FirstOrDefault();
+                controlFactura.CodControl = ultimoCodControl + 1;
 
-            if (controlFactura.Comentario == null)
-            {
-                controlFactura.Comentario = "Sin comentario";
-            }
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(controlFactura);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                var errores = ModelState.Values.SelectMany(v => v.Errors)
-                                   .Select(e => e.ErrorMessage)
-                                   .ToList();
-                foreach (var error in errores)
+                //Para combinar el sit con su código
+                if (controlFactura.Origen != "contrato")
                 {
-                    _logger.LogInformation("AAAAAAAAAAAA " + error);
+                    controlFactura.Origen = textoSIT;
                 }
+
+                //es el codPresupuesto donde esté el codItem seleccionado y año contables
+                //Dejé de considerar año ya que hay casos que no se compra el mismo mes que se presupuestó
+                var codPresupuesto = _context.Presupuestos
+                .Where(p =>
+                        p.CodItem == codItem &&
+                        //p.Mes == factura.MesContable &&
+                        p.Anio == anio)
+                    .Select(p => p.CodPresupuesto)
+                    .FirstOrDefault();
+                controlFactura.CodPresupuesto = codPresupuesto;
+
+                if (controlFactura.Comentario == null)
+                {
+                    controlFactura.Comentario = "Sin comentario";
+                }
+
+                if (ModelState.IsValid)
+                {
+                    _context.Add(controlFactura);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                       .Select(e => e.ErrorMessage)
+                                       .ToList();
+                    foreach (var error in errores)
+                    {
+                        _logger.LogInformation("AAAAAAAAAAAA " + error);
+                    }
+                }
+                return View(controlFactura);
             }
-            return View(controlFactura);
+
+            return Json("No se ha ingresado el valor del dólar de este periodo de tiempo.");
         }
 
         //// GET: Ipcs/Edit/5

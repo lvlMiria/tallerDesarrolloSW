@@ -7,11 +7,7 @@
 }
 
 <div class="card-body m-5" style="background-color:white; border-radius: 5px">
-    <div class="d-flex flex-row-reverse">
-        <a asp-action="ListaPresupuestos">
-            Ver Lista <span class="material-icons">arrow_circle_right</span>
-        </a>
-    </div>
+    
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="row">
             <h3>Presupuestos</h3>
@@ -22,6 +18,19 @@
 
         <form asp-action="Create" method="post">
             <div class="row m-2">
+                @*Concepto*@
+                <div class="col-6">
+                    <label for="cboConcepto" class="form-label">Concepto</label>
+                    <div class="input-group mb-3">
+                        <select id="cboConcepto" class="form-select">
+                            <option selected>Seleccionar concepto</option>
+                            @foreach (var concepto in ViewBag.Conceptos)
+                            {
+                                <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                            }
+                        </select>
+                    </div>
+                </div>
                 @*Item*@
                 <div class="col-6">
                     <label for="cboItems" class="form-label">Item</label>
@@ -38,14 +47,6 @@
                         </select>
                     </div>
                 </div>
-                @*Concepto*@
-                <div class="col-6">
-                    <div class="row m-4">
-                    </div>
-                    <div class="row">
-                        <p id="pConcepto">Concepto: </p>
-                    </div>
-                </div>
             </div>
 
             <div class="row m-2">
@@ -60,7 +61,7 @@
             </div>
 
             <div class="row m-2">
-                <p id="pIPC" style="font-weight:bold">IPC año anterior: </p>
+                <p id="pIPC" style="font-weight:bold">IPC año anterior: @ViewBag.Ipcs %</p>
             </div>
 
             <div class="row m-2">
@@ -81,24 +82,21 @@
             @for (int i = 1; i < 13; i++)
             {
                 <div class="row m-2">
-                    <div class="col-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{i}}" id="chk+@ViewBag.Meses[i-1]">
-                            <label class="form-check-label" for="chk+@ViewBag.Meses[i-1]">@ViewBag.MesesLetras[i - 1]</label>
-                        </div>
+                    <div class="col-8 col-lg-2">
+                        <label>@ViewBag.MesesLetras[i - 1]</label>
                     </div>
 
                     @*Presupuesto mensual*@
-                    <div class="col-3">
+                    <div class="col-8 col-lg-3">
                         <input id="txtPresupuesto@(ViewBag.Meses[i - 1])" class="form-control" type="text" placeholder="Monto en USD" aria-label="txtPresupuestoMes">
                     </div>
 
                     @*Gasto real (acumulado)*@
-                    <div class="col-3">
+                    <div class="col-8 col-lg-3">
                         <input id="txtGastoReal@(ViewBag.Meses[i - 1])" class="form-control" type="text" aria-label="txtGastoReal" readonly>
                     </div>
                     @*Gasto real año anterior*@
-                    <div class="col-4">
+                    <div class="col-8 col-lg-4">
                         <input id="txtGastoAnterior@(ViewBag.Meses[i - 1])" class="form-control" type="text" aria-label="txtGastoAnterior" readonly>
                     </div>
                 </div>
@@ -171,33 +169,26 @@
     </div>
 </div>
 
-@*Estos div son solo para conseguir los viewbag en JS*@
-<div id="concepto" data-items="@JsonSerializer.Serialize(ViewBag.Conceptos, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
-<div id="item" data-items="@JsonSerializer.Serialize(ViewBag.Items, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
-<div id="ipc" data-items="@JsonSerializer.Serialize(ViewBag.Ipcs, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
-
 @section scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        //Aqui quedaste
         $(document).ready(function () {
             $('#btnGrabar').click(function () {
                 var codItem = parseInt($('#cboItems').val(),10)& 0xFFFF;
+
+                var validacion = true;
                 for (i = 1; i < 13; i++) {
                     var txtPresupuesto = parseInt($('#txtPresupuesto'+i).val(),10);
                     var mes = i;
 
-                    console.log(txtPresupuesto);
-                    console.log(mes);
-                    if(txtPresupuesto != null){
+                    if(txtPresupuesto != null && txtPresupuesto!=0 && !isNaN(txtPresupuesto)){
                         $.ajax({
                             url: '/Presupuestoes/Create',
                             type: 'POST',
                             data: { codItem: codItem, mes: mes, presupuesto: txtPresupuesto },
                             success: function (data) {
-                                console.log("YIPIEEEEE");
                                 //Lanza el modal de éxito
                                 $('#modalGrabar').modal("show");
                                 $('#cerrarModal').click(function () {
@@ -209,79 +200,167 @@
                             }
 
                         });
+                    }else{
+                        validacion = false;
                     }
+                }
+                if (!validacion) {
+                    alert("Por favor, ingrese un valor válido.");
                 }
             });
         });
     </script>
 
     <script>
-        //Copie y pegue lo de facturas. Hay que reemplazae con los datos de aqui
-        document.addEventListener("DOMContentLoaded", function () {
-            var cboItems = document.getElementById("cboItems");
-            var pConcepto = document.getElementById("pConcepto");
-            var pTipo = document.getElementById("pTipo");
-            var pClasi = document.getElementById('pClasi');
-            var pIPC = document.getElementById("pIPC");
-            var txtAnual = document.getElementById("txtAnual");
-            var txtAnualGR = document.getElementById("txtAnualGR");
-            var txtAnualGA = document.getElementById("txtAnualGA");
+        $(document).ready(function () {
+            $('#cboItems').change(function () {
+                var itemSeleccionado = $(this).val();
 
-            var presupuestos = [];
-            //Conceptos JSON
-            var conceptoElem = document.getElementById("concepto");
-            var conceptoDatos = conceptoElem.getAttribute("data-items");
-            var conceptosJ = JSON.parse(conceptoDatos);
-            var conceptoItems = conceptosJ.$values;
-            //Items JSON
-            var itemElem = document.getElementById("item");
-            var itemDatos = itemElem.getAttribute("data-items");
-            var itemsJ = JSON.parse(itemDatos);
-            var itemItems = itemsJ.$values;
-            //IPC JSON
-            var ipcElem = document.getElementById("ipc");
-            var ipcDatos = ipcElem.getAttribute("data-items");
-            var ipcJ = JSON.parse(ipcDatos);
-            var ipcItems = ipcJ.$values;
+                $.ajax({
+                    url: '/Presupuestoes/ObtenerItem',
+                    type: 'GET',
+                    data: { codItem: itemSeleccionado },
+                    success: function (item) {
 
-            // Obtener los números de factura correspondientes al item seleccionado
-            cboItems.addEventListener("change", function () {
-                var itemSeleccionado = cboItems.value;
-                //Conseguir Item
-                for (i = 0; i < itemItems.length; i++) {
-                    if (itemItems[i].CodItem == itemSeleccionado) {
-                        var item = itemItems[i];
+                        //continuidad nuevo
+                        $('#pClasi').text('Clasificación: ' + item.contNuevo);
+                        //gasto inversión
+                        $('#pTipo').text('Tipo: ' + item.gastoInversion);
+
+                        //gasto real
+                        var anioActual = new Date().getFullYear();
+                        $.ajax({
+                            url: '/Presupuestoes/ObtenerMontos',
+                            type: 'GET',
+                            data: { codItem: itemSeleccionado, anio: anioActual },
+                            success: function (montos) {
+                                var gastoRealAnual = 0;
+                                for (var i = 1; i <= 12; i++) {
+                                    var txtGastoReal = document.getElementById('txtGastoReal' + i);
+                                    txtGastoReal.value = montos[i - 1];
+                                    gastoRealAnual = gastoRealAnual + montos[i - 1];
+                                }
+                                //gasto real anual
+                                var txtAnualGR = document.getElementById('txtAnualGR');
+                                txtAnualGR.value = gastoRealAnual;
+
+                                //Gasto año pasado
+                                var anioPasado = new Date().getFullYear() - 1;
+                                $.ajax({
+                                    url: '/Presupuestoes/ObtenerMontos',
+                                    type: 'GET',
+                                    data: { codItem: itemSeleccionado, anio: anioPasado },
+                                    success: function (montos) {
+                                        var gastoAnteriorAnual = 0;
+                                        for (var i = 1; i <= 12; i++) {
+                                            var txtGastoAnterior = document.getElementById('txtGastoAnterior' + i);
+
+                                            txtGastoAnterior.value = montos[i - 1];
+                                            gastoAnteriorAnual = gastoAnteriorAnual + montos[i - 1];
+                                        }
+                                        //gasto año pasado anual
+                                        var txtAnualGA = document.getElementById('txtAnualGA');
+                                        txtAnualGA.value = gastoAnteriorAnual;
+
+                                        //Presupuesto recomendado
+                                        $.ajax({
+                                            url: '/Presupuestoes/CalcularPresupuestos',
+                                            type: 'GET',
+                                            data: { codItem: itemSeleccionado, anio: anioPasado },
+                                            success: function (montos) {
+                                                var presupuestoPropAnual = 0;
+                                                if (montos != "IPC no ingresado." && montos != "No hay facturas del año pasado.") {
+                                                    for (var i = 1; i <= 12; i++) {
+                                                        var txtPresupuesto = document.getElementById('txtPresupuesto' + i);
+
+                                                        txtPresupuesto.value = montos[i - 1];
+                                                        presupuestoPropAnual = presupuestoPropAnual + montos[i - 1];
+                                                    }
+                                                } else {
+                                                    var txtPresupuesto = document.getElementById('txtPresupuesto' + 1);
+                                                    txtPresupuesto.value = montos;
+                                                }
+                                                var txtAnual = document.getElementById('txtAnual');
+                                                txtAnual.value = presupuestoPropAnual;
+
+
+                                            },
+                                            error: function (xhr, status, error) {
+                                                console.log("error al obtener gasto mensual anterior");
+                                            }
+                                        });
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.log("error al obtener gasto mensual anterior");
+                                    }
+
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.log("error al obtener gasto mensual real");
+                            }
+
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("error al obtener el item");
                     }
-                    //Mostrar concepto
-                    for (j = 0; j < conceptoItems.length; j++) {
-                        if (conceptoItems[j].CodConcepto == item.CodConcepto) {
-                            pConcepto.textContent = "Concepto: " + conceptoItems[i].DescConcepto;
-                        }
-                    }
-                    //Mostrar Clasificación y tipo
-                    pClasi.textContent = "Clasificación: " + item.ContNuevo;
-                    pTipo.textContent = "Tipo: " + item.GastoInversion;
 
-                }
-
+                });
             });
+        });
+    </script>
+    <script>
+        //Actualizar input total al cambiar los presupuestos
+        $(document).ready(function () {
 
-            //Mostrar IPC año anterior
-            var anioAnterior = new Date().getFullYear() - 1;
-            //Flag por si no está el año anterior ingresado
-            var flagIPC = false;
-            for (j = 0; j < ipcItems.length; j++) {
-                if (ipcItems[j].Anio == anioAnterior) {
-                    //Si encuentra el año, activa la flag y muestra el valor
-                    flagIPC = true;
-                    pIPC.textContent = "IPC año anterior: " + ipcItems[j].Valor + "%";
-                }
-            }
-            //Si la flag no fue activada, se muestra un mensaje.
-            if (!flagIPC) {
-                pIPC.textContent = "IPC año anterior no ingresado.";
-            }
+            var presupuestoPropAnual = 0;
+            for (var j = 1; j <= 12; j++) {
+                var txtPresupuesto = $('#txtPresupuesto' + j);
+                txtPresupuesto.change(function () {
 
+                    presupuestoPropAnual = 0;
+                    for (var i = 1; i <= 12; i++) {
+                        var txtPresupuesto = $('#txtPresupuesto' + i);
+                        presupuestoPropAnual += parseFloat(txtPresupuesto.val()) || 0;
+                    }
+
+                    $('#txtAnual').val(presupuestoPropAnual);
+                });
+            }
+        });
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#cboConcepto').change(function () {
+                var codConcepto = parseInt($(this).val());
+                $.ajax({
+                    url: '/Presupuestoes/ItemsPorConcepto',
+                    type: 'GET',
+                    data: { codConcepto: codConcepto },
+                    success: function (response) {
+
+                        $('#cboItems').empty();
+
+                        $('#cboItems').append($('<option>', {
+                            text: "Seleccionar item"
+                        }));
+                        for (var i = 0; i < response.length; i++) {
+                            var item = response[i];
+                            $('#cboItems').append($('<option>', {
+                                value: item.codItem,
+                                text: item.descItem
+                            }));
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error al obtener los items:', error);
+                    }
+                });
+            });
         });
     </script>
 }

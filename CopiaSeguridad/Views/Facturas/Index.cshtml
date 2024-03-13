@@ -8,10 +8,18 @@
 }
 
 <div class="card-body m-5" style="background-color:white; border-radius: 5px">
-    <div class="d-flex flex-row-reverse">
-        <a asp-action="ListaFacturas">
-            Ver Lista <span class="material-icons">arrow_circle_right</span>
-        </a>
+    <div class="col">
+        <div class="d-flex flex-row-reverse">
+            <a asp-action="ListaFacturas">
+                Ver Detalle <span class="material-icons">arrow_circle_right</span>
+            </a>
+        </div>
+        <div class="d-flex flex-row-reverse">
+            <a asp-action="ResumenFacturas">
+                Ver Resumen <span class="material-icons">arrow_circle_right</span>
+            </a>
+        </div>
+
     </div>
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="row">
@@ -42,11 +50,12 @@
                 <button class="btn btn-outline-secondary" type="button" id="btnAtras">
                     <span class="material-icons">arrow_back_ios</span>
                 </button>
-                <input id="nFactura" type="text" class="form-control" aria-label="nFactura" value="">
+                <input id="nFactura" type="text" class="form-control" aria-label="nFactura" placeholder="Seleccione un item">
                 <button class="btn btn-outline-secondary" type="button" id="btnAdelante">
                     <span class="material-icons">arrow_forward_ios</span>
                 </button>
             </div>
+            <span id="msjErrorNum" class="alert-danger"></span>
         </div>
 
         @*Monto*@
@@ -56,6 +65,7 @@
                 <span class="input-group-text">$</span>
                 <input id="txtMonto" type="text" class="form-control" aria-label="txtMonto" value="">
             </div>
+            <span id="msjErrorMonto" class="alert-danger"></span>
         </div>
 
         <div class="row m-1">
@@ -64,10 +74,9 @@
             <div class="input-group mb-3">
                 <select class="form-select" aria-label="cboEmpresa" id="cboEmpresa">
                     <option selected >Seleccione una empresa</option>
-                    <option value="Comgrap">Comgrap</option>
-                    <option value="Oasis-tec">Oasis-tec</option>
                 </select>
             </div>
+            <span id="msjErrorEmpresa" class="alert-danger"></span>
         </div>
 
         <input type="hidden" id="txtCodFactura" />
@@ -76,7 +85,46 @@
 
         @*Este div es solo para conseguir los elementos de ControlFactura*@
         <div id="control" data-items="@JsonSerializer.Serialize(ViewBag.Control, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })"></div>
+ 
         @section scripts {
+            <script>
+                //Filtrar combobox escribiendo
+                document.getElementById("cboEmpresa").addEventListener("input", function () {
+                    var input, filter, select, options, option, i, txtValue;
+                    input = this.value;
+                    select = document.getElementById("cboEmpresa");
+                    options = select.getElementsByTagName("option");
+                    filter = input.toUpperCase();
+
+                    for (i = 0; i < options.length; i++) {
+                        option = options[i];
+                        txtValue = option.textContent || option.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            option.style.display = "";
+                        } else {
+                            option.style.display = "none";
+                        }
+                    }
+                });
+            </script>
+
+            <script>
+                //BUSCAR COMO FILTRAR ENTRE LAS 8000+ EMPRESAS
+                $.ajax({
+                    url: '/Facturas/ObtenerEmpresas',
+                    type: 'GET',
+                    success: function (data) {
+                        $('#cboEmpresa').empty();
+
+                        $.each(data, function (index, option) {
+                            $('#cboEmpresa').append($('<option>', {
+                                value: option.rutEmpresa,
+                                text: option.nomEmpresa
+                            }));
+                        });
+                    }
+                });
+            </script>
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     var cboItems = document.getElementById("cboItems");
@@ -343,73 +391,152 @@
                         var txtMes = document.getElementById("txtMes").value;
                         var txtAnio = document.getElementById("txtAnio").value;
 
-                        txtCodFactura = parseInt(txtCodFactura, 10);
-                        cboItems = parseInt(cboItems, 10) & 0xFFFF;
-                        txtMonto = parseInt(txtMonto, 10);
-                        txtMes = parseInt(txtMes, 10) & 0xFF;
-                        txtAnio = parseInt(txtAnio, 10) & 0xFFFF;
+                        mostrarError("msjErrorNum", "");
+                        mostrarError("msjErrorMonto", "");
+                        mostrarError("msjErrorEmpresa", "");
+                        mostrarError("msjErrorMes", "");
+                        mostrarError("msjErrorAnio", "");
 
-                        $.ajax({
-                            url: '/Facturas/Edit',
-                            type: 'POST',
-                            data: { id: txtCodFactura, codFactura: txtCodFactura, numFactura: nFactura, monto: txtMonto, mesContable: txtMes, anioContable: txtAnio, empresa: cboEmpresa },
-                            success: function (data) {
-                                //todo ok, paso a actualizar controlFactura
-                                var txtCodControl = document.getElementById('txtCodControl').value;
-                                var txtCodPresupuesto = document.getElementById('txtCodPresupuesto').value;
-                                var rdbContrato = document.getElementById('rdbContrato');
-                                var rdbSIT = document.getElementById('rdbSIT');
-                                var txtSIT = document.getElementById('txtSIT').value;
-                                var origen = ""
-                                var txtComentario = document.getElementById('txtComentario').value;
-                                var dtRecepcion = document.getElementById('dtRecepcion').value;
-                                var dtEntrega = document.getElementById('dtEntrega').value;
+                        function validarFormulario() {
+                            var estado = true;
+                            var numRegex = /^\d+$/;
+                            var mesRegex = /^(1[0-2]|[1-9])$/;
+                            var anioRegex = /^\d{1,4}$/; // Acepta de 1 a 4 dígitos del 0 al 9
 
-                                txtCodControl = parseInt(txtCodControl, 10);
-                                txtCodPresupuesto = parseInt(txtCodPresupuesto, 10);
 
-                                if (rdbSIT.checked) {
-                                    origen = "sit-"+txtSIT;
-                                } else if (rdbContrato.checked) {
-                                    origen = "contrato";
-                                }
-
-                                $.ajax({
-                                    url: '/ControlFacturas/Edit',
-                                    type: 'POST',
-                                    data: { id: txtCodControl, codControl: txtCodControl, codPresupuesto: txtCodPresupuesto, codFactura: txtCodFactura, origen: origen, fechaRecepcion: dtRecepcion, fechaEntrega: dtEntrega, comentario: txtComentario },
-                                    success: function (data) {
-                                        console.log("YIPIEEEEE");
-                                        $('#modalEdicion').modal("show");
-                                        $('#cerrarModal').click(function () {
-                                            $('#modalEdicion').modal('hide');
-                                        });
-                                    },
-                                    error: function (xhr, status, error) {
-                                        console.log("Error en la solicitud AJAX: " + error);
-                                    }
-
-                                });
-                            },
-                            error: function (xhr, status, error) {
-                                console.log("Error en la solicitud AJAX: " + error);
+                            if (nFactura == "") {
+                                mostrarError("msjErrorNum", "Ingrese el número de factura");
+                                estado = false;
                             }
 
-                        });
+                            if (txtMonto == "") {
+                                mostrarError("msjErrorMonto", "Ingrese el monto");
+                                estado = false;
+                            }
+
+                            if (cboEmpresa == "Seleccione una empresa") {
+                                mostrarError("msjErrorEmpresa", "Seleccione una empresa");
+                                estado = false;
+                            }
+
+                            if (txtMes == "") {
+                                mostrarError("msjErrorMes", "Ingrese el mes contable");
+                                estado = false;
+                            }
+
+                            if (txtAnio == "") {
+                                mostrarError("msjErrorAnio", "Ingrese el año contable");
+                                estado = false;
+                            }
+                            txtCodFactura = parseInt(txtCodFactura, 10);
+                            cboItems = parseInt(cboItems, 10) & 0xFFFF;
+                            txtMonto = parseInt(txtMonto, 10);
+                            txtMes = parseInt(txtMes, 10) & 0xFF;
+                            txtAnio = parseInt(txtAnio, 10) & 0xFFFF;
+
+                            // Verificar si los valores son del tipo esperado
+                            if (isNaN(parseInt(txtMonto))) {
+                                mostrarError("msjErrorMonto", "El monto debe ser un número válido");
+                                estado = false;
+                            }
+
+                            if (isNaN(parseInt(txtMes))) {
+                                mostrarError("msjErrorMes", "El mes contable debe ser un número válido");
+                                estado = false;
+                            }
+
+                            if (isNaN(parseInt(txtAnio))) {
+                                mostrarError("msjErrorAnio", "El año contable debe ser un número válido");
+                                estado = false;
+                            }
+
+                            if (!numRegex.test(txtMonto)) {
+                                mostrarError("msjErrorMonto", "Ingrese solo números para el monto");
+                                estado = false;
+                            }
+
+                            if (!mesRegex.test(txtMes)) {
+                                mostrarError("msjErrorMes", "Ingrese solo números en formato MM");
+                                estado = false;
+                            }
+
+                            if (!anioRegex.test(txtAnio)) {
+                                mostrarError("msjErrorAnio", "Ingrese solo números en formato yyyy");
+                                estado = false;
+                            }
+
+                            return estado;
+                        }
+                        function mostrarError(spanId, mensaje) {
+                            var spanError = document.getElementById(spanId);
+                            spanError.innerText = mensaje;
+                        }
+
+                        if (validarFormulario()) {
+                            $.ajax({
+                                url: '/Facturas/Edit',
+                                type: 'POST',
+                                data: { id: txtCodFactura, codFactura: txtCodFactura, numFactura: nFactura, monto: txtMonto, mesContable: txtMes, anioContable: txtAnio, empresa: cboEmpresa },
+                                success: function (data) {
+                                    //todo ok, paso a actualizar controlFactura
+                                    var txtCodControl = document.getElementById('txtCodControl').value;
+                                    var txtCodPresupuesto = document.getElementById('txtCodPresupuesto').value;
+                                    var rdbContrato = document.getElementById('rdbContrato');
+                                    var rdbSIT = document.getElementById('rdbSIT');
+                                    var txtSIT = document.getElementById('txtSIT').value;
+                                    var origen = ""
+                                    var txtComentario = document.getElementById('txtComentario').value;
+                                    var dtRecepcion = document.getElementById('dtRecepcion').value;
+                                    var dtEntrega = document.getElementById('dtEntrega').value;
+
+                                    txtCodControl = parseInt(txtCodControl, 10);
+                                    txtCodPresupuesto = parseInt(txtCodPresupuesto, 10);
+
+                                    if (rdbSIT.checked) {
+                                        origen = "sit-" + txtSIT;
+                                    } else if (rdbContrato.checked) {
+                                        origen = "contrato";
+                                    }
+
+                                    $.ajax({
+                                        url: '/ControlFacturas/Edit',
+                                        type: 'POST',
+                                        data: { id: txtCodControl, codControl: txtCodControl, codPresupuesto: txtCodPresupuesto, codFactura: txtCodFactura, origen: origen, fechaRecepcion: dtRecepcion, fechaEntrega: dtEntrega, comentario: txtComentario },
+                                        success: function (data) {
+                                            $('#modalEdicion').modal("show");
+                                            $('#cerrarModal').click(function () {
+                                                $('#modalEdicion').modal('hide');
+                                            });
+                                        },
+                                        error: function (xhr, status, error) {
+                                            //no funciona
+                                        }
+
+                                    });
+                                },
+                                error: function (xhr, status, error) {
+                                    console.log("Error en la solicitud AJAX: " + error);
+
+                                }
+
+                            });
+                        }
                     });
                 });
             </script>
-            
+
         }
 
         <div class="row m-3">
             <label for="dtRecepcion">Fecha de Recepción</label>
             <input id="dtRecepcion" class="form-control" type="date"/>
+            <span id="msjErrorRecepcion" class="alert-danger"></span>
         </div>
 
         <div class="row m-3">
             <label for="dtEntrega">Fecha de Entrega</label>
             <input id="dtEntrega" class="form-control" type="date"/>
+            <span id="msjErrorEntrega" class="alert-danger"></span>
         </div>
 
         @*Mes y año contable*@
@@ -417,14 +544,16 @@
             <div class="col-6">
                 <label for="txtMes">Mes Contable</label>
                 <div class="input-group mb-3">
-                    <input id="txtMes" type="text" class="form-control" aria-label="txtMes">
+                    <input placeholder="MM" id="txtMes" type="text" class="form-control" aria-label="txtMes">
                 </div>
+                <span id="msjErrorMes" class="alert-danger"></span>
             </div>
             <div class="col-6">
                 <label for="txtAnio">Año Contable</label>
                 <div class="input-group mb-3">
-                    <input id="txtAnio" type="text" class="form-control" aria-label="txtAnio">
+                    <input placeholder="yyyy" id="txtAnio" type="text" class="form-control" aria-label="txtAnio">
                 </div>
+                <span id="msjErrorAnio" class="alert-danger"></span>
             </div>
         </div>
 
@@ -438,6 +567,7 @@
                         Contrato
                     </label>
                 </div>
+                <span id="msjErrorContrato" class="alert-danger"></span>
             </div>
             <div class="col-6">
                 <div class="form-check">

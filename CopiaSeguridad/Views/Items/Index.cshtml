@@ -5,6 +5,11 @@
 }
 
 <div class="card-body m-5" style="background-color:white; border-radius: 5px">
+    <div class="d-flex flex-row-reverse">
+        <a asp-action="ListaItems">
+            Ver Lista <span class="material-icons">arrow_circle_right</span>
+        </a>
+    </div>
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="row">
             <h3>Items</h3>
@@ -32,9 +37,18 @@
                 <label for="cboConcepto" class="form-label">Concepto</label>
                 <div class="input-group mb-3">
                     <select class="form-select" id="cmbConcepto" name="cmbConcepto">
-                        @foreach(var concepto in ViewBag.Conceptos)
-                        { 
-                            <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                        @foreach (var concepto in ViewBag.Conceptos)
+                        {
+                            @if (concepto.DescConcepto != "RRHH")
+                            {
+                                var conceptoMayus = char.ToUpper(concepto.DescConcepto[0]) + concepto.DescConcepto.Substring(1).ToLower();
+                                <option value="@concepto.CodConcepto">@conceptoMayus</option>
+                            }
+                            else
+                            {
+                                <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                            }
+
                         }
                     </select>
                     @section scripts{
@@ -125,7 +139,6 @@
                         </script>
                         <script>
                             //Para grabar
-                            //CodItem,DescItem,GastoInversion,ContNuevo,CodConcepto,Estado
                             $(document).ready(function () {
                                 $('#btnGrabar').click(function () {
                                     var separar = $('#nombre_item').val().split("-");
@@ -135,14 +148,12 @@
                                     var contNuevo = $('input[name="rdbContNuevo"]:checked').val();
                                     var codConcepto = $('#cmbConcepto').val();
                                     var estado = $('input[name="rdbEstado"]:checked').val();
-                                    //var estadoByte = estado & 0xFF;
 
                                     $.ajax({
                                         url: '/Items/Edit',
                                         type: 'POST',
                                         data: { id:codItem, codItem: codItem, descItem: descItem, gastoInversion: gastoInv, contNuevo: contNuevo, codConcepto: codConcepto, estado: estado },
                                         success: function (data) {
-                                            console.log("YIPIEEEEE");
                                             //Lanza el modal de éxito
                                             $('#modalGrabar').modal("show");
                                             $('#cerrarModal').click(function () {
@@ -174,7 +185,7 @@
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input value="inversión" class="form-check-input" type="radio" name="rdbGastoInv" id="rdbInversion" @(ViewBag.PrimerItem.GastoInversion == "inversion" ? "checked" : "") />
+                                <input value="inversion" class="form-check-input" type="radio" name="rdbGastoInv" id="rdbInversion" @(ViewBag.PrimerItem.GastoInversion == "inversion" ? "checked" : "") />
                                 <label class="form-check-label" for="rdbInversion">
                                     Inversión
                                 </label>

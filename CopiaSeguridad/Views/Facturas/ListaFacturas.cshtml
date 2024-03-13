@@ -1,23 +1,25 @@
-﻿@model IEnumerable<Presentacion.Models.Factura>
+﻿@* @model IEnumerable<Presentacion.Models.Factura> *@
+@model Presentacion.Controllers.LFacturaViewModel
 
 
 @{
     ViewData["Title"] = "Lista de Facturas";
 }
 
+@*ENCABEZADO*@
 <div class="row mb-3">
     <div class="col-8">
         <div class="row p-2">
-            @*Combos*@
+            @*Combo año*@
             <div class="col">
                 <label for="cboAnio" class="form-label" style="font-weight:bold">Año</label>
                 <div class="input-group mb-3">
-                    <select class="form-select" aria-label="cboAnio">
-                        <option selected>Seleccionar año</option>
+                    <select id="cboAnio" class="form-select" aria-label="cboAnio">
+                        <option selected>Todos los años</option>
                         @{
                             List<Int16?> repeticionAnio = new List<Int16?>();
                         }
-                        @foreach (var factura in Model){
+                        @foreach (var factura in Model.Facturas){
                             var repetido = false;
                             foreach (Int16? anio in repeticionAnio)
                             {
@@ -35,15 +37,16 @@
                     </select>
                 </div>
             </div>
+            @*Combo mes*@
             <div class="col">
                 <label for="cboMes" class="form-label" style="font-weight:bold">Mes</label>
                 <div class="input-group mb-3">
-                    <select class="form-select" aria-label="cboMes">
-                        <option selected>Seleccionar mes</option>
+                    <select id="cboMes" class="form-select" aria-label="cboMes">
+                        <option selected>Todos los meses</option>
                         @{
                             List<byte?> repeticionMes = new List<byte?>();
                         }
-                        @foreach (var factura in Model)
+                        @foreach (var factura in Model.Facturas)
                         {
                             var repetido = false;
                             foreach (byte mes in repeticionMes)
@@ -62,14 +65,23 @@
                     </select>
                 </div>
             </div>
+            @*Combo concepto*@
             <div class="col">
                 <label for="cboConcepto" class="form-label" style="font-weight:bold">Concepto</label>
                 <div class="input-group mb-3">
-                    <select class="form-select" aria-label="cboConcepto">
-                        <option selected>Seleccionar concepto</option>
+                    <select id="cboConcepto" class="form-select" aria-label="cboConcepto">
+                        <option selected>Todos los conceptos</option>
                         @foreach (var concepto in ViewBag.Conceptos)
                         {
-                            <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                            @if (concepto.DescConcepto != "RRHH")
+                            {
+                                var conceptoMayus = char.ToUpper(concepto.DescConcepto[0]) + concepto.DescConcepto.Substring(1).ToLower();
+                                <option value="@concepto.CodConcepto">@conceptoMayus</option>
+                            }
+                            else
+                            {
+                                <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                            }
                         }
                     </select>
                 </div>
@@ -82,7 +94,7 @@
             <div class="col">
                 <div class="m-2">
                     <div class="d-grid gap-2">
-                        <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Exportar</button>
+                        <button id="btnExportar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Exportar</button>
                     </div>
                 </div>
             </div>
@@ -99,45 +111,223 @@
     </div>
 </div>
 
+@*TABLA*@
 <div class="container m-2" style="background-color:white">
     <div class="tabla-scroll">
-        <table class="table table-striped table-hover" style="overflow-x:scroll">
+        <table id="tbFacturas" class="table table-striped table-hover" style="overflow-x:scroll">
             <thead>
                 <tr>
                     <th scope="col">Item</th>
-                    <th scope="col">@Html.DisplayNameFor(model => model.NumFactura)</th>
+                    <th scope="col">Número Factura</th>
                     <th scope="col">Concepto</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">@Html.DisplayNameFor(model => model.Empresa)</th>
+                    <th scope="col">Empresa</th>
                     <th scope="col">Origen</th>
-                    <th scope="col">@Html.DisplayNameFor(model => model.Monto)</th>
+                    <th scope="col">Monto CLP</th>
                     <th scope="col">Monto USD</th>
                     <th scope="col">Fecha Recepción</th>
                     <th scope="col">Fecha Entrega</th>
-                    <th scope="col">@Html.DisplayNameFor(model => model.MesContable)</th>
-                    <th scope="col">@Html.DisplayNameFor(model => model.AnioContable)</th>
+                    <th scope="col">Mes Contable</th>
+                    <th scope="col">Año Contable</th>
                     <th scope="col">Comentarios</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model){
-                <tr>
-                    <td>Impresoras</td>
-                    <td>@Html.DisplayFor(modelItem => item.NumFactura)</td>
-                    <td>Concepto</td>
-                    <td>Continuidad Operativa</td>
-                    <td>@Html.DisplayFor(modelItem => item.Empresa)</td>
-                    <td>Contrato</td>
-                    <td>@Html.DisplayFor(modelItem => item.Monto)</td>
-                    <td>500</td>
-                    <td>31/01/2024</td>
-                    <td>02/02/2024</td>
-                    <td>@Html.DisplayFor(modelItem => item.MesContable)</td>
-                    <td>@Html.DisplayFor(modelItem => item.AnioContable)</td>
-                    <td></td>
-                </tr>
+                @foreach (var factura in Model.Facturas)
+                {
+                    <tr id="factura-@factura.CodFactura" class="fila-factura" data-factura-id="@factura.CodFactura">
+                        <td class="columna-item" data-factura-id="@factura.CodFactura"></td>
+                        <td>@factura.NumFactura</td>
+                        <td class="columna-concepto" data-factura-id="@factura.CodFactura"></td>
+                        <td>@factura.Empresa</td>
+                        <td>@factura.ControlFacturas.FirstOrDefault()?.Origen</td>
+                        <td>@factura.Monto</td>
+                        <td>
+                            @{
+                                // Verifica si el valor del dolar fue ingresado
+                                var valorTipoCambio = factura.TipoCambio.Valor;
+                                if (valorTipoCambio != null && valorTipoCambio != 0)
+                                {
+                                    var resultado = Math.Round(factura.Monto / valorTipoCambio,2);
+                                            @resultado
+                                }
+                                else
+                                {
+                                        @Html.Raw("Dólar no ingresado")
+                                }
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var fechaRecepcion = factura.ControlFacturas.FirstOrDefault()?.FechaRecepcion;
+                                var fechaRFormateada = fechaRecepcion.Value.ToString("dd/MM/yyyy");
+                                                    @fechaRFormateada
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var fechaEntrega = factura.ControlFacturas.FirstOrDefault()?.FechaEntrega;
+                                var fechaEFormateada = fechaEntrega.Value.ToString("dd/MM/yyyy");
+                                                    @fechaEFormateada
+                            }
+                        </td>
+                        <td class="mes-contable">@factura.MesContable</td>
+                        <td class="anio-contable">@factura.AnioContable</td>
+                        <td>@factura.ControlFacturas.FirstOrDefault()?.Comentario</td>
+                    </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+@section scripts{
+    <script>
+        //Para buscar el concepto de cada registro
+        $(document).ready(function () {
+            $('.columna-concepto').each(function () {
+                var codFactura = $(this).data('factura-id');
+                obtenerConcepto(codFactura, $(this));
+            });
+        });
+
+        function obtenerConcepto(codFactura, elementoColumna) {
+            $.ajax({
+                url: '/Facturas/ObtenerConcepto',
+                type: 'GET',
+                data: { codFactura: codFactura },
+                success: function (concepto) {
+                    elementoColumna.text(concepto);
+                },
+                error: function () {
+                    elementoColumna.text('n/a');
+                }
+            });
+        }
+    </script>
+
+    <script>
+        //Para buscar el item de cada registro
+        $(document).ready(function () {
+            $('.columna-item').each(function () {
+                var codFactura = $(this).data('factura-id');
+                obtenerItem(codFactura, $(this));
+            });
+        });
+
+        function obtenerItem(codFactura, elementoColumna) {
+            $.ajax({
+                url: '/Facturas/ObtenerItem',
+                type: 'GET',
+                data: { codFactura: codFactura },
+                success: function (item) {
+                    elementoColumna.text(item);
+                },
+                error: function () {
+                    elementoColumna.text('n/a');
+                }
+            });
+        }
+    </script>
+
+    <script>
+        //Para exportar a Excel
+        $(document).ready(function () {
+            $('#btnExportar').click(function () {
+                window.location.href = '/Exportar/ExportarExcel';
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () { 
+            OrdenarCboMes();
+            OrdenarCboAnio();
+
+            var tabla = document.getElementById("tbFacturas");
+            var filas = tabla.getElementsByTagName("tr");
+
+            //redirigir a factura específica
+            for (var i = 0; i < filas.length; i++) {
+                filas[i].addEventListener("click", function () {
+                    var facturaId = this.getAttribute("data-factura-id");
+                    window.location.href = "/Facturas/Details?id=" + facturaId;
+                });
+            }
+        });
+
+        function OrdenarCboMes() {
+            //Ordenar select mes
+            var cboMes = document.getElementById("cboMes");
+            var opciones = Array.from(cboMes.options);
+            // (menor a mayor)
+            opciones.sort(function (a, b) {
+                return a.value - b.value;
+            });
+
+            cboMes.innerHTML = "";
+            opciones.forEach(function (opcion) {
+                cboMes.appendChild(opcion);
+            });
+        }
+
+        function OrdenarCboAnio() {
+            //Ordenar select año
+            var cboAnio = document.getElementById("cboAnio");
+            var opciones = Array.from(cboAnio.options);
+
+            // (menor a mayor)
+            opciones.sort(function (a, b) {
+                return a.value - b.value;
+            });
+
+            cboAnio.innerHTML = "";
+            opciones.forEach(function (opcion) {
+                cboAnio.appendChild(opcion);
+            });
+        }
+        
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Filtrar por año, mes y concepto
+            $("#cboAnio, #cboMes, #cboConcepto").change(function () {
+                var anioSeleccionado = $("#cboAnio").val();
+                var mesSeleccionado = $("#cboMes").val();
+                var conceptoSeleccionado = $("#cboConcepto").val();
+
+                $(".fila-factura").each(function () {
+                    var facturaAnio = $(this).find(".anio-contable").text();
+                    var facturaMes = $(this).find(".mes-contable").text();
+                    var facturaConcepto = $(this).find(".columna-concepto").text();
+
+                    var mostrar = true;
+
+                    if (anioSeleccionado != "Todos los años" && facturaAnio != anioSeleccionado) {
+                        mostrar = false;
+                    }
+
+                    if (mesSeleccionado != "Todos los meses" && facturaMes != mesSeleccionado) {
+                        mostrar = false;
+                    }
+
+                    if (conceptoSeleccionado != "Todos los conceptos") {
+                        var elementos = ["software", "hardware", "servicios", "RRHH"];
+                        var conceptoPal = elementos[parseInt(conceptoSeleccionado) - 1];
+                        if (facturaConcepto !== conceptoPal) {
+                            mostrar = false;
+                        }
+                    }
+
+                    if (mostrar) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+        });
+    </script>
+
+}

@@ -7,11 +7,11 @@ public partial class Item
 {
     public short CodItem { get; set; }
 
-    public string? DescItem { get; set; }
+    public string DescItem { get; set; }
 
-    public string? GastoInversion { get; set; }
+    public string GastoInversion { get; set; }
 
-    public string? ContNuevo { get; set; }
+    public string ContNuevo { get; set; }
 
     public byte? CodConcepto { get; set; }
 

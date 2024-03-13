@@ -14,34 +14,26 @@
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="card" style="width: 30rem;border-color:forestgreen">
             <div class="card-body">
-                <form asp-action="Create">
+                <form id="formUSD">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     @*Valor*@
                     <div class="row m-1 form-group">
                         <label for="txtValor" class="form-label">Valor</label>
                         <div class="input-group mb-3">
-                            <input asp-for="Valor" type="text" class="form-control" aria-label="txtValor">
-                            <span asp-validation-for="Valor" class="text-danger"></span>
+                            <input type="text" class="form-control" id="txtValor">
                         </div>
+                        <span asp-validation-for="Valor" class="text-danger"></span>
                     </div>
                     
-                    @*Mes*@
+                    @*Mes y año*@
                     <div class="row m-1 form-group">
-                        <label for="txtMes" class="form-label">Mes</label>
+                        <label for="dtMesAnio" class="form-label">Mes y Año</label>
                         <div class="input-group mb-3">
-                            <input asp-for="Mes" type="text" class="form-control" aria-label="txtMes">
-                            <span asp-validation-for="Mes" class="text-danger"></span>
+                            <input type="month" class="form-control" id="dtMesAnio" max="@ViewBag.FechaMaxima">
                         </div>
+                        <span class="text-danger"></span>
                     </div>
-                    
-                    @*año*@
-                    <div class="row m-1 form-group">
-                        <label for="txtAnio" class="form-label">Año</label>
-                        <div class="input-group mb-3">
-                            <input asp-for="Anio" type="text" class="form-control" aria-label="txtAnio">
-                            <span asp-validation-for="Anio" class="text-danger"></span>
-                        </div>
-                    </div>
+
                     @*Botones*@
                     <div class="row form-group" style="margin-top:40px">
 
@@ -55,18 +47,10 @@
                             </div>
                         </div>
 
-                        @* <div class="col-12 col-md-4">
-                            <div class="m-2">
-                                <div class="d-grid gap-2">
-                                    <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Actualizar</button>
-                                </div>
-                            </div>
-                        </div> *@
-
                         <div class="col-12 col-md-4">
                             <div class="m-2">
                                 <div class="d-grid gap-2">
-                                    <input type="submit" value="Ingresar" style=" background-color: forestgreen; color: white;" class="btn"/>
+                                    <input id="btnNuevo" value="Ingresar" style=" background-color: forestgreen; color: white;" class="btn"/>
                                 </div>
                             </div>
                         </div>
@@ -79,43 +63,68 @@
     </div>
 
 </div>
+
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        //Boton nuevo
+        document.getElementById("btnNuevo").addEventListener("click", function () {
+            var dtMesAnio = document.getElementById("dtMesAnio").value.toString();
+            var partesFecha = dtMesAnio.split('-');
+            var mes = parseInt(partesFecha[1]);
+            var anio = parseInt(partesFecha[0]);
+            var txtValor = document.getElementById("txtValor").value;
+
+            $.ajax({
+                url: '/Facturas/BuscarDolar',
+                type: 'GET',
+                data: { mes: mes, anio: anio },
+                success: function (data) {
+                    if (data == null) {
+                        console.log(txtValor);
+                        $.ajax({
+                            url: '/TipoCambios/Create',
+                            type: 'POST',
+                            data: { mes: mes, anio: anio, valor: txtValor },
+                            success: function (data) {
+                                alert("Dólar ingresado exitosamente.");
+                            },
+                            error: function (error) {
+                                alert("Error " + error);
+                            }
+                        });
+                    } else {
+                        alert("Fecha ya ingresada")
+                    }
+                },
+            });
+
+            
+        });
+    </script>
+    @* <script>
+        document.getElementById("formUSD").addEventListener("submit", function (event) {
+            // Detener el envío del formulario para validar si el dólar fue ingresado
+            event.preventDefault();
+
+            var txtAnio = document.getElementById('txtAnio').value;
+            txtAnio = parseInt(txtAnio, 10) & 0xFFFF;
+            var txtMes = document.getElementById('txtMes').value;
+            txtMes = parseInt(txtMes, 10) & 0xFF;
+
+            $.ajax({
+                url: '/Facturas/BuscarDolar',
+                type: 'GET',
+                data: { mes: txtMes, anio: txtAnio },
+                success: function (data) {
+                    if (data == null) {
+                        this.submit();
+                    } else {
+                        alert("Fecha ya ingresada")
+                    }
+                },
+            });
+        });
+    </script> *@
+
+
 }
-
-@* 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Mes" class="control-label"></label>
-                <input asp-for="Mes" class="form-control" />
-                <span asp-validation-for="Mes" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Anio" class="control-label"></label>
-                <input asp-for="Anio" class="form-control" />
-                <span asp-validation-for="Anio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Valor" class="control-label"></label>
-                <input asp-for="Valor" class="form-control" />
-                <span asp-validation-for="Valor" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-} *@

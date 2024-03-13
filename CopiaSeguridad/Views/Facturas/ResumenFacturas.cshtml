@@ -1,0 +1,278 @@
+﻿@model Presentacion.Controllers.LFacturaViewModel
+
+@{
+    ViewData["Title"] = "Resumen de Facturas";
+}
+
+<div class="row mb-3">
+    <div class="col-8">
+        <div class="row p-2">
+            @*Combos*@
+            <div class="col">
+                <label for="cboAnio" class="form-label" style="font-weight:bold">Año</label>
+                <div class="input-group mb-3">
+                    <select id="cboAnio" class="form-select" aria-label="cboAnio">
+                        <option selected>Todos los años</option>
+                        @{
+                            List<Int16?> repeticionAnio = new List<Int16?>();
+                        }
+                        @foreach (var factura in Model.Facturas)
+                        {
+                            var repetido = false;
+                            foreach (Int16? anio in repeticionAnio)
+                            {
+                                if (factura.AnioContable == anio)
+                                {
+                                    repetido = true;
+                                }
+                            }
+                            if (repetido == false)
+                            {
+                                <option value="@factura.AnioContable">@factura.AnioContable</option>
+                                repeticionAnio.Add(factura.AnioContable);
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <label for="cboMes" class="form-label" style="font-weight:bold">Mes</label>
+                <div class="input-group mb-3">
+                    <select id="cboMes" class="form-select" aria-label="cboMes">
+                        <option selected>Todos los meses</option>
+                        @{
+                            List<byte?> repeticionMes = new List<byte?>();
+                        }
+                        @foreach (var factura in Model.Facturas)
+                        {
+                            var repetido = false;
+                            foreach (byte mes in repeticionMes)
+                            {
+                                if (factura.MesContable == mes)
+                                {
+                                    repetido = true;
+                                }
+                            }
+                            if (repetido == false)
+                            {
+                                <option value="@factura.MesContable">@factura.MesContable</option>
+                                repeticionMes.Add(factura.MesContable);
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <div class="col-4">
+        @*Botones*@
+        <div class="row ms-auto p-2">
+            <div class="col">
+                <div class="m-2">
+                    <div class="d-grid gap-2">
+                        <button id="btnExportar" type="button" style=" background-color: forestgreen; color: white;" class="btn">Exportar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="m-2">
+                    <a asp-action="Index">
+                        <div class="d-grid gap-2">
+                            <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Volver</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container m-2" style="background-color:white">
+    <div class="tabla-scroll">
+        <table id="tblFacturas" class="table table-striped table-hover" style="overflow-x:scroll">
+            <thead>
+                <tr>
+                    <th scope="col">Concepto</th>
+                    @*función para escribir meses*@
+                    <th scope="col" id="1" class="col-mes">Enero</th>
+                    <th scope="col" id="2" class="col-mes">Febrero</th>
+                    <th scope="col" id="3" class="col-mes">Marzo</th>
+                    <th scope="col" id="4" class="col-mes">Abril</th>
+                    <th scope="col" id="5" class="col-mes">Mayo</th>
+                    <th scope="col" id="6" class="col-mes">Junio</th>
+                    <th scope="col" id="7" class="col-mes">Julio</th>
+                    <th scope="col" id="8" class="col-mes">Agosto</th>
+                    <th scope="col" id="9" class="col-mes">Septiembre</th>
+                    <th scope="col" id="10" class="col-mes">Octubre</th>
+                    <th scope="col" id="11" class="col-mes">Noviembre</th>
+                    <th scope="col" id="12" class="col-mes">Diciembre</th>
+                    @*Suma de presupuestos*@
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var concepto in Model.Conceptos){
+                    <tr>
+                        <td>@concepto.DescConcepto</td>
+                        @{
+                            var facturaTotal = 0;
+                        }
+                        @for(var i = 1; i <= 12; i++)
+                        {
+                            var valor = 0;
+                            @foreach(var item in Model.Items)
+                            {
+                                if(item.CodConcepto == concepto.CodConcepto)
+                                {
+                                    foreach (var presupuesto in Model.Presupuestos)
+                                    {
+                                        if (presupuesto.CodItem == item.CodItem)
+                                        {
+                                            foreach(var control in Model.Controles)
+                                            {
+                                                if(control.CodPresupuesto == presupuesto.CodPresupuesto)
+                                                {
+                                                    foreach(var factura in Model.Facturas)
+                                                    {
+                                                        if (factura.MesContable == i && control.CodFactura == factura.CodFactura)
+                                                        {
+                                                            valor += factura.Monto;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                    
+                            }
+                            <td id="@i" class="col-mes">@valor</td>
+                            facturaTotal += valor;
+                                
+                        }
+                        <td>$@facturaTotal</td>
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts{
+    
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            OrdenarCboMes();
+            OrdenarCboAnio();
+        });
+
+        function OrdenarCboMes() {
+            //Ordenar select mes
+            var cboMes = document.getElementById("cboMes");
+            var opciones = Array.from(cboMes.options);
+            // (menor a mayor)
+            opciones.sort(function (a, b) {
+                return a.value - b.value;
+            });
+
+            cboMes.innerHTML = "";
+            opciones.forEach(function (opcion) {
+                cboMes.appendChild(opcion);
+            });
+        }
+
+        function OrdenarCboAnio() {
+            //Ordenar select año
+            var cboAnio = document.getElementById("cboAnio");
+            var opciones = Array.from(cboAnio.options);
+
+            // (menor a mayor)
+            opciones.sort(function (a, b) {
+                return a.value - b.value;
+            });
+
+            cboAnio.innerHTML = "";
+            opciones.forEach(function (opcion) {
+                cboAnio.appendChild(opcion);
+            });
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Filtrar por año
+            $("#cboAnio").change(function () {
+                var anioSeleccionado = $("#cboAnio").val();
+
+                $(".fila-presupuesto").each(function () {
+                    var presupuestoAnio = $(this).find(".columna-anio").text();
+
+                    var mostrar = true;
+
+                    if (anioSeleccionado != "Todos los años" && presupuestoAnio != anioSeleccionado) {
+                        mostrar = false;
+                    }
+
+                    if (mostrar) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            //Filtrar por mes
+            $("#cboMes").change(function () {
+                var mesSeleccionado = $("#cboMes").val();
+
+                $(".col-mes").each(function () {
+                    var presupuestoMes = $(this).attr("id");
+                    console.log(presupuestoMes);
+
+                    var mostrar = true;
+
+                    if (mesSeleccionado != "Todos los meses" && mesSeleccionado != presupuestoMes) {
+                        mostrar = false;
+                    }
+
+                    if (mostrar) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    <script>
+        //Para exportar a Excel
+        $(document).ready(function () {
+            $('#btnExportar').click(function () {
+                guardarDatos();
+            });
+        });
+        function guardarDatos() {
+            var formulario = $('<form method="post" action="/Exportar/ExportarResumenFact"></form>');
+
+            $('#tblFacturas tbody tr').each(function () {
+                $(this).find('td').each(function () {
+                    formulario.append($('<input type="text" name="datos" value="' + $(this).text() + '">'));
+                });
+            });
+
+            $('body').append(formulario);
+            formulario.submit();
+            eliminarInputs();
+        }
+
+        function eliminarInputs() {
+            $('form input[name="datos"]').remove();
+        }
+
+    </script>
+}

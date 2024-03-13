@@ -13,12 +13,14 @@
 
     <div class="container-fluid d-flex flex-column justify-content-center" style="width:800px">
         <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             @*Item*@
             <div class="row m-2">
                 <label for="nombre_item" class="form-label">Item</label>
                 <div class="input-group mb-3">
                     <input asp-for="DescItem" type="text" class="form-control" placeholder="Nombre del item" aria-label="nombre_item">
                 </div>
+                <span asp-validation-for="DescItem" class="text-danger"></span>
             </div>
 
             @*Concepto*@
@@ -30,7 +32,16 @@
                         @{
                             @foreach (var concepto in ViewBag.Conceptos)
                             {
-                                <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                                @if(concepto.DescConcepto != "RRHH")
+                                {
+                                    var conceptoMayus = char.ToUpper(concepto.DescConcepto[0]) + concepto.DescConcepto.Substring(1).ToLower();
+                                    <option value="@concepto.CodConcepto">@conceptoMayus</option>
+                                }
+                                else
+                                {
+                                    <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                                }
+
                             }
                         }
                     </select>
@@ -46,12 +57,12 @@
                             <div class="form-check">
                                 <div>
                                     Gasto <input type="radio" asp-for="GastoInversion" value="gasto" />
-                                    
                                 </div>
                                 <div>
                                     Inversión <input type="radio" asp-for="GastoInversion" value="inversion" />
                                 </div>
                             </div>
+                            <span asp-validation-for="GastoInversion" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -69,6 +80,7 @@
                                     Nuevo Proyecto <input type="radio" asp-for="ContNuevo" value="nuevo proyecto" />
                                 </div>
                             </div>
+                            <span asp-validation-for="ContNuevo" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -79,7 +91,7 @@
                         <div class="card-body">
                             <div class="form-check">
                                 <div>
-                                    Activo <input type="radio" asp-for="Estado" value="1" />
+                                    Activo <input type="radio" asp-for="Estado" value="1" checked />
 
                                 </div>
                                 <div>
@@ -98,19 +110,9 @@
 
                 <div class="col-12 col-md-4">
                     <div class="m-2">
-                        <a asp-action="Index" asp-controller="Home">
-                            <div class="d-grid gap-2">
-                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Salir</button>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-                    <div class="m-2">
                         <a asp-action="Index">
                             <div class="d-grid gap-2">
-                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Editar</button>
+                                <button type="button" style=" background-color: forestgreen; color: white;" class="btn">Volver</button>
                             </div>
                         </a>
                     </div>

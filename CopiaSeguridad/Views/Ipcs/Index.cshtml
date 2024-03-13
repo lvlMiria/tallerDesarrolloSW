@@ -63,19 +63,26 @@
                                     $('#btnActualizar').click(function () {
                                         var anio = parseInt($('#txtAnio').val()) & 0xFFFF;
                                         var valor = $('#txtValor').val();
-                                        console.log(valor,anio);
-                                        $.ajax({
-                                            url: '/Ipcs/Edit',
-                                            type: 'POST',
-                                            data: { id: anio, anio:anio, valor: valor },
-                                            success: function (data) {
-                                                console.log("YIPIEEEEE");
-                                            },
-                                            error: function (xhr, status, error) {
-                                                console.log("Error en la solicitud AJAX: " + error);
-                                            }
+                                        if (anio != "" && valor != 0) {
+                                            $.ajax({
+                                                url: '/Ipcs/Edit',
+                                                type: 'POST',
+                                                data: { id: anio, anio:anio, valor: valor },
+                                                success: function (data) {
+                                                    //Lanza el modal de éxito
+                                                    $('#modalActualizacion').modal("show");
+                                                    $('#cerrarModal').click(function () {
+                                                        $('#modalActualizacion').modal('hide');
+                                                    });
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    console.log("Error en la solicitud AJAX: " + error);
+                                                }
                                                                          
-                                        });
+                                            });
+                                        } else {
+                                            alert("Ingrese todos los datos por favor.");
+                                        }
                                     });
                                 });
                             </script>
@@ -98,24 +105,27 @@
 
     </div>
 
-    @* <div class="container-fluid d-flex flex-column align-items-center">
-
-        <div class="row m-1">
-            <p style="font-weight:bold">Histórico</p>
-        </div>
-        <div class="col">
-            @foreach (var item in Model)
-            {
-                <p>
-                    @Html.DisplayFor(modelItem => item.Anio): @Html.DisplayFor(modelItem => item.Valor)% | @Html.ActionLink("Actualizar", "Edit", new {id = item.Anio })
-                </p>
-            }
-        </div>
-    </div> *@
-
 </div>
 
-
+@*MODAL ACTUALIZACIÓN EXISTOSA*@
+<div class="modal" tabindex="-1" role="dialog" id="modalActualizacion">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actualización exitosa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>El valor del IPC se ha actualizado exitosamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cerrarModal" type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @* ================ Original ================
 <p>

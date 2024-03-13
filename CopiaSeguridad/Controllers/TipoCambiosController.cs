@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Presentacion.Models;
 
@@ -25,7 +26,8 @@ namespace Presentacion.Controllers
         // GET: TipoCambios
         public async Task<IActionResult> Index()
         {
-            ViewBag.Error = "";
+            string fecha = DateTime.Today.ToString("yyyy-MM");
+            ViewBag.FechaMaxima = fecha;
 
             //Primer item de la tabla
             ViewBag.Mostrar = _context.TipoCambios
@@ -60,17 +62,14 @@ namespace Presentacion.Controllers
             Int16 anio = Int16.Parse(txtAnio);
             if (_context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anio).FirstOrDefault() == null)
             {
-                ViewBag.Mostrar = _context.TipoCambios
-                .OrderByDescending(tc => tc.Anio)
-                .ThenByDescending(tc => tc.Mes)
-                .FirstOrDefault();
-
-                ViewBag.Error = "Combinación de mes y año no ingresada en la base de datos.";
-                return View("Index");
+                
+                return Json("Combinación de mes y año no ingresada en la base de datos.");
             }
 
-            ViewBag.Mostrar = _context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anio).FirstOrDefault();
-            return View("Index");
+            var mostrar = _context.TipoCambios.Where(tc => tc.Mes == mes && tc.Anio == anio).FirstOrDefault();
+
+            return Json(mostrar);
+
 
         }
 
@@ -95,6 +94,9 @@ namespace Presentacion.Controllers
         // GET: TipoCambios/Create
         public IActionResult Create()
         {
+            string fecha = DateTime.Today.ToString("yyyy-MM");
+            ViewBag.FechaMaxima = fecha;
+
             return View();
         }
 
@@ -102,34 +104,29 @@ namespace Presentacion.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Mes,Anio,Valor")] TipoCambio tipoCambio)
         {
-            if (ModelState.IsValid)
+            
+            try
             {
-                _context.Add(tipoCambio);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(tipoCambio);
+                    await _context.SaveChangesAsync();
+                    ViewBag.Mensaje = "Datos ingresados exitosamente";
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            catch(DbUpdateException ex)
+            {
+                ViewBag.Mensaje = "La combinación de año y mes ingresada ya se encuentra en la base de datos.";
+                return View(tipoCambio);
+            }
+            
+            ViewBag.Mensaje = "Error al ingresar los datos";
             return View(tipoCambio);
         }
-
-        // GET: TipoCambios/Edit/5
-
-        //public async Task<IActionResult> Edit(byte? mes,Int16? anio)
-        //{
-        //    if (mes == null || anio == null || _context.TipoCambios == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var tipoCambio = await _context.TipoCambios.FindAsync(mes,anio);
-        //    if (tipoCambio == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return View(tipoCambio);
-        //}
 
         // POST: TipoCambios/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.

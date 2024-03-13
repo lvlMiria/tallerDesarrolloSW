@@ -7,11 +7,11 @@ public partial class Presupuesto
 {
     public int CodPresupuesto { get; set; }
 
-    public byte? Mes { get; set; }
+    public byte Mes { get; set; }
 
     public short? Anio { get; set; }
 
-    public int? PresupuestoMes { get; set; }
+    public int PresupuestoMes { get; set; }
 
     public short? CodItem { get; set; }
 

@@ -8,10 +8,18 @@
 }
 
 <div class="card-body m-5" style="background-color:white; border-radius: 5px">
-    <div class="d-flex flex-row-reverse">
-        <a asp-action="ListaPresupuestos">
-            Ver Lista <span class="material-icons">arrow_circle_right</span>
-        </a>
+    <div class="col">
+        <div class="d-flex flex-row-reverse">
+            <a asp-action="ListaPresupuestos">
+                Ver Detalle <span class="material-icons">arrow_circle_right</span>
+            </a>
+        </div>
+        <div class="d-flex flex-row-reverse">
+            <a asp-action="ResumenPresupuestos">
+                Ver Resumen <span class="material-icons">arrow_circle_right</span>
+            </a>
+        </div>
+
     </div>
     <div class="container-fluid d-flex flex-column align-items-center">
         <div class="row">
@@ -22,6 +30,19 @@
     <div class="container flex-column justify-content-center" style="width:800px">
         <form>
             <div class="row m-2">
+                @*Concepto*@
+                <div class="col-6">
+                    <label for="cboConcepto" class="form-label">Concepto</label>
+                    <div class="input-group mb-3">
+                        <select id="cboConcepto" class="form-select">
+                            <option selected>Seleccionar concepto</option>
+                            @foreach (var concepto in ViewBag.Conceptos)
+                            {
+                                <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
+                            }
+                        </select>
+                    </div>
+                </div>
                 @*Item*@
                 <div class="col-6">
                     <label for="cboItems" class="form-label">Item</label>
@@ -38,28 +59,7 @@
                         </select>
                     </div>
                 </div>
-                @{
-                    var codItem = Context.Request.Form["itemSeleccionado"];
 
-                    var itemVB = (List<Item>)ViewBag.Items;
-                    var itemSeleccionado = itemVB.FirstOrDefault(i => i.CodItem == @codItem);
-                }
-                @*Concepto*@
-                <div class="col-6">
-                    <div class="row m-4">
-                    </div>
-                    <div class="row">
-                        @*AQUI QUEDASTE*@
-                        @if (ViewBag.Concepto != null && ViewBag.Concepto.Id == itemSeleccionado.CodConcepto)
-                        {
-                            <p id="pConcepto">Concepto: @ViewBag.Concepto.DescConcepto</p>
-                        }
-                        else
-                        {
-                            <p id="pConcepto">Concepto: seleccione un item.</p>
-                        }
-                    </div>
-                </div>
             </div>
 
             <div class="row m-2">
@@ -74,20 +74,20 @@
             </div>
 
             <div class="row m-2">
-                <p id="pIPC" style="font-weight:bold">IPC año anterior: @ViewBag.Ipcs</p>
+                <p id="pIPC" style="font-weight:bold">IPC año anterior: @ViewBag.Ipcs %</p>
             </div>
 
             <div class="row m-2">
-                <div class="col-2">
+                <div class="col-8 col-lg-2">
                     <p style="font-weight:bold">Mes</p>
                 </div>
-                <div class="col-3">
+                <div class="col-8 col-lg-3">
                     <p style="font-weight:bold">Presupuesto</p>
                 </div>
-                <div class="col-3">
+                <div class="col-8 col-lg-3">
                     <p style="font-weight:bold">Gasto real</p>
                 </div>
-                <div class="col-4">
+                <div class="col-8 col-lg-4">
                     <p style="font-weight:bold">Gasto real año pasado</p>
                 </div>
             </div>
@@ -95,24 +95,23 @@
             @for (int i = 1; i < 13; i++)
             {
                 <div class="row m-2">
-                    <div class="col-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{i}}" id="chk+@ViewBag.Meses[i-1]">
-                            <label class="form-check-label" for="chk+@ViewBag.Meses[i-1]">@ViewBag.MesesLetras[i - 1]</label>
-                        </div>
+                    <input type="hidden" id="txtCodPresupuesto@(ViewBag.Meses[i - 1])" />
+
+                    <div class="col-8 col-lg-2">
+                        <label>@ViewBag.MesesLetras[i - 1]</label>
                     </div>
 
                     @*Presupuesto mensual*@
-                    <div class="col-3">
+                    <div class="col-8 col-lg-3">
                         <input id="txtPresupuesto@(ViewBag.Meses[i - 1])" class="form-control" type="text" placeholder="Monto en USD" aria-label="txtPresupuestoMes">
                     </div>
 
                     @*Gasto real (acumulado)*@
-                    <div class="col-3">
+                    <div class="col-8 col-lg-3">
                         <input id="txtGastoReal@(ViewBag.Meses[i - 1])" class="form-control" type="text" aria-label="txtGastoReal" readonly>
                     </div>
                     @*Gasto real año anterior*@
-                    <div class="col-4">
+                    <div class="col-8 col-lg-4">
                         <input id="txtGastoAnterior@(ViewBag.Meses[i - 1])" class="form-control" type="text" aria-label="txtGastoAnterior" readonly>
                     </div>
                 </div>
@@ -169,22 +168,222 @@
                 </div>
 
             </div>
+
         </form>
     </div>
 
 </div>
 
-<input type="hidden" id="itemSeleccionado" name="itemSeleccionado" value="" />
 
 @section scripts{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        var cboItems = document.getElementById("cboItems");
+        $(document).ready(function () {
+            $('#cboConcepto').change(function () {
+                var codConcepto = parseInt($(this).val());
 
-        cboItems.addEventListener("change", function () {
-            var itemSeleccionado = cboItems.value;
-            document.getElementById("itemSeleccionado").value = itemSeleccionado;
+                $.ajax({
+                    url: '/Presupuestoes/ItemsPorConcepto',
+                    type: 'GET',
+                    data: { codConcepto: codConcepto },
+                    success: function (response) {
+
+                        $('#cboItems').empty();
+
+                        $('#cboItems').append($('<option>', {
+                            text: "Seleccionar item"
+                        }));
+                        for (var i = 0; i < response.length; i++) {
+                            var item = response[i];
+                            $('#cboItems').append($('<option>', {
+                                value: item.codItem,
+                                text: item.descItem
+                            }));
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error al obtener los items:', error);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#cboItems').change(function () {
+                var itemSeleccionado = $(this).val();
+
+                $.ajax({
+                    url: '/Presupuestoes/ObtenerItem',
+                    type: 'GET',
+                    data: { codItem: itemSeleccionado },
+                    success: function (item) {
+
+                        //continuidad nuevo
+                        $('#pClasi').text('Clasificación: ' + item.contNuevo);
+                        //gasto inversión
+                        $('#pTipo').text('Tipo: ' + item.gastoInversion);
+
+                        var anioActual = new Date().getFullYear();
+                        $.ajax({
+                            url: '/Presupuestoes/ObtenerMontos',
+                            type: 'GET',
+                            data: { codItem: itemSeleccionado, anio: anioActual },
+                            success: function (montos) {
+                                var gastoRealAnual = 0;
+                                for (var i = 1; i <= 12; i++) {
+                                    var txtGastoReal = document.getElementById('txtGastoReal' + i);
+                                    txtGastoReal.value = montos[i - 1];
+                                    gastoRealAnual = gastoRealAnual + montos[i - 1];
+                                }
+                                var txtAnualGR = document.getElementById('txtAnualGR');
+                                txtAnualGR.value = gastoRealAnual;
+
+                                var anioPasado = new Date().getFullYear() - 1;
+                                $.ajax({
+                                    url: '/Presupuestoes/ObtenerMontos',
+                                    type: 'GET',
+                                    data: { codItem: itemSeleccionado, anio: anioPasado },
+                                    success: function (montos) {
+                                        var gastoAnteriorAnual = 0;
+                                        for (var i = 1; i <= 12; i++) {
+                                            var txtGastoAnterior = document.getElementById('txtGastoAnterior' + i);
+
+                                            txtGastoAnterior.value = montos[i - 1];
+                                            gastoAnteriorAnual = gastoAnteriorAnual + montos[i - 1];
+                                        }
+                                        var txtAnualGA = document.getElementById('txtAnualGA');
+                                        txtAnualGA.value = gastoAnteriorAnual;
+
+                                        $.ajax({
+                                            url: '/Presupuestoes/ObtenerPresupuestos',
+                                            type: 'GET',
+                                            data: { codItem: itemSeleccionado, anio: anioActual },
+                                            success: function (montos) {
+                                                var presupuestoAnual = 0;
+                                                for (var i = 1; i <= 12; i++) {
+                                                    var txtPresupuesto = document.getElementById('txtPresupuesto' + i);
+
+                                                    txtPresupuesto.value = montos[i - 1];
+                                                    if (montos[i - 1] == 0) {
+                                                        txtPresupuesto.readOnly = true;
+                                                    } else {
+                                                        txtPresupuesto.readOnly = false;
+                                                    }
+                                                    presupuestoAnual = presupuestoAnual + montos[i - 1];
+                                                }
+                                                var txtAnual = document.getElementById('txtAnual');
+                                                txtAnual.value = presupuestoAnual;
+
+                                                //obtener códigos de presupuestos para usar en edición
+                                                $.ajax({
+                                                    url: '/Presupuestoes/ObtenerCodigos',
+                                                    type: 'GET',
+                                                    data: { codItem: itemSeleccionado, anio: anioActual },
+                                                    success: function (codigos) {
+                                                        for (var i = 1; i <= 12; i++) {
+                                                            var txtCodPresupuesto = document.getElementById('txtCodPresupuesto' + i);
+
+                                                            txtCodPresupuesto.value = codigos[i - 1];
+                                                        }
+
+                                                    },
+                                                    error: function (xhr, status, error) {
+                                                        console.log("error al obtener presupuestos");
+                                                    }
+
+                                                });
+                                            },
+                                            error: function (xhr, status, error) {
+                                                console.log("error al obtener presupuestos");
+                                            }
+
+                                        });
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.log("error al obtener gasto mensual anterior");
+                                    }
+
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.log("error al obtener gasto mensual real");
+                            }
+
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("error al obtener el item");
+                    }
+
+                });
+            });
+        });
+    </script>
+
+    <script>
+        //Editar presupuesto
+        $(document).ready(function () {
+            $('#btnGrabar').click(function () {
+                var anio = new Date().getFullYear();
+                var codItem = parseInt($('#cboItems').val(), 10);
+
+                var validacion = true;
+                for (var i = 1; i <= 12; i++) {
+                    var txtCodPresupuesto = parseInt($('#txtCodPresupuesto'+i).val());
+                    if (txtCodPresupuesto != 0) {
+                        var mes = i;
+                        var presupuestoMes = parseInt($('#txtPresupuesto' + i).val(), 10);
+                        if (!isNaN(presupuestoMes) && txtPresupuesto != null) {
+                            $.ajax({
+                                url: '/Presupuestoes/Edit',
+                                type: 'POST',
+                                data: { id: txtCodPresupuesto, codPresupuesto: txtCodPresupuesto, mes: mes, anio: anio, presupuestoMes: presupuestoMes, codItem: codItem },
+                                success: function (data) {
+                                    // Lanza el modal de éxito
+                                    $('#modalEdicion').modal("show");
+                                    $('#cerrarModal').click(function () {
+                                        $('#modalEdicion').modal('hide');
+                                    });
+                                },
+                                error: function (xhr, status, error) {
+                                    console.log("Error en la edición: " + error);
+                                    console.log(xhr);
+                                }
+
+                            });
+                        }else{
+                            validacion = false;
+                        }
+                        
+                    }
+                }
+                if (!validacion) {
+                    alert("Por favor, ingrese un valor válido.");
+                }
+            });
         });
     </script>
 }
+@*MODAL EDICIÓN EXISTOSA*@
+<div class="modal" tabindex="-1" role="dialog" id="modalEdicion">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edición exitosa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Los datos del presupuesto se han actualizado exitosamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cerrarModal" type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 

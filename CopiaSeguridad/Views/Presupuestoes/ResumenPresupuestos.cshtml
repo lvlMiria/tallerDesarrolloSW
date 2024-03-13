@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Presentacion.Models.Presupuesto>
 
 @{
-    ViewData["Title"] = "Lista de Presupuestos";
+    ViewData["Title"] = "Resumen de Presupuestos";
 }
 
 <div class="row mb-3">
@@ -62,26 +62,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col">
-                <label for="cboConcepto" class="form-label" style="font-weight:bold">Concepto</label>
-                <div class="input-group mb-3">
-                    <select id="cboConcepto" class="form-select" aria-label="cboConcepto">
-                        <option selected>Todos los conceptos</option>
-                        @foreach (var concepto in ViewBag.Conceptos)
-                        {
-                            @if (concepto.DescConcepto != "RRHH")
-                            {
-                                var conceptoMayus = char.ToUpper(concepto.DescConcepto[0]) + concepto.DescConcepto.Substring(1).ToLower();
-                                <option value="@concepto.CodConcepto">@conceptoMayus</option>
-                            }
-                            else
-                            {
-                                <option value="@concepto.CodConcepto">@concepto.DescConcepto</option>
-                            }
-                        }
-                    </select>
-                </div>
-            </div>
+            
         </div>
     </div>
     <div class="col-4">
@@ -112,15 +93,7 @@
         <table id="tblPresupuestos" class="table table-striped table-hover" style="overflow-x:scroll">
             <thead>
                 <tr>
-                    <th scope="col">Item</th>
-                    <th scope="col">Tipo</th>
                     <th scope="col">Concepto</th>
-                    @*Suma de presupuestos*@
-                    <th scope="col">Presupuesto anual</th>
-                    @*Suma de facturas*@
-                    <th scope="col">Gasto Real</th>
-                    @*Función*@
-                    <th scope="col">Diferencia</th>
                     @*función para escribir meses*@
                     <th scope="col" id="1" class="col-mes">Enero</th>
                     <th scope="col" id="2" class="col-mes">Febrero</th>
@@ -134,59 +107,85 @@
                     <th scope="col" id="10" class="col-mes">Octubre</th>
                     <th scope="col" id="11" class="col-mes">Noviembre</th>
                     <th scope="col" id="12" class="col-mes">Diciembre</th>
-                    <th scope="col"">Año</th>
+                    @*Suma de presupuestos*@
+                    <th scope="col">Presupuesto anual</th>
+                    @*Suma de presupuestos*@
+                    <th scope="col">Gasto Real</th>
+                    @*Función*@
+                    <th scope="col">Diferencia</th>
                 </tr>
             </thead>
             <tbody>
-                @{
-                    List<short?> codigosRepetidos = new List<short?>();
-                }
-                @foreach (var presupuesto in Model)
-                {
-                    if (!codigosRepetidos.Contains(presupuesto.CodItem))
-                    {
-                        codigosRepetidos.Add(presupuesto.CodItem);
-                        <tr id="presupuesto-@presupuesto.CodPresupuesto" class="fila-presupuesto" data-presupuesto-id="@presupuesto.CodPresupuesto">
-                            @foreach (var item in ViewBag.Items)
+                @foreach(var concepto in ViewBag.Conceptos){
+                    <tr>
+                        <td>@concepto.DescConcepto</td>
+                        @{
+                            var presuTotal = 0;
+                        }
+                        @for(var i = 1; i <= 12; i++)
+                        {
+                            var valor = 0;
+                            @foreach(var item in ViewBag.Items)
                             {
-                                @if (item.CodItem == presupuesto.CodItem)
+                                if(item.CodConcepto == concepto.CodConcepto)
                                 {
-                                    <td id="@item.CodItem">@item.DescItem</td>
-                                    <td>@item.GastoInversion</td>
-                                    @foreach (var concepto in ViewBag.Conceptos)
+                                    foreach (var presupuesto in Model)
                                     {
-                                        @if (item.CodConcepto == concepto.CodConcepto)
+                                        if (presupuesto.Mes == i && presupuesto.CodItem == item.CodItem)
                                         {
-                                            <td class="columna-concepto">@concepto.DescConcepto</td>
+                                            valor += presupuesto.PresupuestoMes;
                                         }
                                     }
                                 }
+                                    
+                            }
+                            <td id="@i" class="col-mes">@valor</td>
+                            presuTotal += valor;
+                                
+                        }
+                        <td>$@presuTotal</td>
+                        @{
+                            var gastoTotal = 0;
+                            var repetido = new List<int>();
+                        }
+                        @for (var i = 1; i <= 12; i++)
+                        {
+                            @foreach (var item in ViewBag.Items)
+                            {
+                                if (item.CodConcepto == concepto.CodConcepto)
+                                {
+                                    foreach(var control in ViewBag.Control)
+                                    {
+                                        foreach(var factura in ViewBag.Facturas)
+                                        {
+                                            foreach (var presupuesto in Model)
+                                            {
+                                                if (presupuesto.CodItem == item.CodItem && presupuesto.CodPresupuesto == control.CodPresupuesto && control.CodFactura == factura.CodFactura)
+                                                {
+                                                    if (!repetido.Contains(presupuesto.CodPresupuesto))
+                                                    {
+                                                        repetido.Add(presupuesto.CodPresupuesto);
+                                                        foreach (var cambio in ViewBag.Cambio)
+                                                        {
+                                                            if (cambio.Mes == factura.MesContable && cambio.Anio == factura.AnioContable)
+                                                            {
+                                                                var montoUSD = factura.Monto / cambio.Valor;
+                                                                gastoTotal += montoUSD;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                }
 
                             }
-                            <td>$</td>
-                            <td>$</td>
-                            <td>16,7%</td>
-                            @for (var i = 1; i < 13; i++)
-                            {
-                                var valor = false;
-                                foreach (var presu in Model)
-                                {
-                                    if (presu.Mes == i && presu.CodItem == presupuesto.CodItem && presu.Anio == presupuesto.Anio)
-                                    {
-                                        <td id="@i" class="col-mes">@presu.PresupuestoMes</td>
-                                        valor = true;
-                                        break;
-                                    }
-                                }
-                                if (!valor)
-                                {
-                                    <td id="@i" class="col-mes">0</td>
-                                }
-                            }
-                            <td class="columna-anio">@presupuesto.Anio</td>
-                        </tr>
-                    }
-                    
+                        }
+                        <td>$@gastoTotal</td>
+                        <td>%</td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -195,20 +194,24 @@
 
 @section scripts{
     <script>
+
+        var filas = document.querySelectorAll('table tr');
+
+        for (var i = 1; i < filas.length; i++) {
+            var celdas = filas[i].querySelectorAll('td');
+            var presuTotal = parseFloat(celdas[13].innerText.replace(/\D/g, ''));
+            var gastoTotal = parseFloat(celdas[14].innerText.replace(/\D/g, ''));
+
+            var diferenciaPorcentual = (((gastoTotal - presuTotal) / presuTotal) * 100)+100;
+
+            celdas[15].innerText = diferenciaPorcentual.toFixed(2) + '%';
+        }
+    </script>
+
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
             OrdenarCboMes();
             OrdenarCboAnio();
-
-            var tabla = document.getElementById("tblPresupuestos");
-            var filas = tabla.getElementsByTagName("tr");
-
-            //redirigir a presupuesto específico
-            for (var i = 0; i < filas.length; i++) {
-                filas[i].addEventListener("click", function () {
-                    var presupuestoId = this.getAttribute("data-presupuesto-id");
-                    window.location.href = "/Presupuestoes/Details?id=" + presupuestoId;
-                });
-            }
         });
 
         function OrdenarCboMes() {
@@ -245,27 +248,17 @@
 
     <script>
         $(document).ready(function () {
-            // Filtrar por año y concepto
-            $("#cboAnio, #cboConcepto").change(function () {
+            // Filtrar por año
+            $("#cboAnio").change(function () {
                 var anioSeleccionado = $("#cboAnio").val();
-                var conceptoSeleccionado = $("#cboConcepto").val();
 
                 $(".fila-presupuesto").each(function () {
                     var presupuestoAnio = $(this).find(".columna-anio").text();
-                    var presupuestoConcepto = $(this).find(".columna-concepto").text();
 
                     var mostrar = true;
 
                     if (anioSeleccionado != "Todos los años" && presupuestoAnio != anioSeleccionado) {
                         mostrar = false;
-                    }
-
-                    if (conceptoSeleccionado != "Todos los conceptos") {
-                        var elementos = ["software", "hardware", "servicios", "RRHH"];
-                        var conceptoPal = elementos[parseInt(conceptoSeleccionado) - 1];
-                        if (presupuestoConcepto != conceptoPal) {
-                            mostrar = false;
-                        }
                     }
 
                     if (mostrar) {
@@ -287,12 +280,8 @@
                     var mostrar = true;
 
                     if (mesSeleccionado != "Todos los meses" && mesSeleccionado != presupuestoMes) {
-                        //$(this).css("color", "red");
                         mostrar = false;
                     }
-                    // } else {
-                    //     $(this).css("color", "");
-                    // }
 
                     if (mostrar) {
                         $(this).show();
@@ -313,7 +302,7 @@
             });
         });
         function guardarDatos() {
-            var formulario = $('<form method="post" action="/Exportar/ExportarPresupuestos"></form>');
+            var formulario = $('<form method="post" action="/Exportar/ExportarResumenPres"></form>');
 
             $('#tblPresupuestos tbody tr').each(function () {
                 $(this).find('td').each(function () {
@@ -331,68 +320,4 @@
         }
 
     </script>
-
-    <script>
-        //Agregar valores td Presupuesto y gasto anual
-        var tabla = document.getElementById("tblPresupuestos");
-        var filas = tabla.rows;
-
-        for (var i = 1; i < filas.length; i++) {
-            var total = 0;
-            var celdas = filas[i].cells;
-            for (var j = 0; j < celdas.length; j++) {
-                //presupuesto anual
-                if (j > 5 && j != celdas.length - 1) {
-                    total = total + parseInt(celdas[j].innerText);
-                }
-            }
-            celdas[3].innerText = "$" + total;
-
-            //gasto real (tuve que separarlo en una función, ya que la solicitud AJAX es asíncrona,
-            // al pasar a la siguiente iteración no espera a que se complete)
-            obtenerGastoReal(celdas);
-
-            //diferencia
-            obtenerDiferencia(celdas);
-         }
-
-        function obtenerGastoReal(celdas) {
-            var codItem = celdas[0].getAttribute("id");
-            var anio = celdas[18].innerText;
-            $.ajax({
-                url: '/Presupuestoes/ObtenerMontos',
-                type: 'GET',
-                data: { codItem: codItem, anio: anio },
-                success: function (monto) {
-                    var gastoReal = 0;
-                    for (var k = 0; k < 12; k++) {
-                        gastoReal += monto[k];
-                    }
-                    celdas[4].innerText = "$"+gastoReal;
-                },
-                error: function (xhr, status, error) {
-                    console.log("Error al obtener gastos reales " + error);
-                }
-            });
-        }
-
-        function obtenerDiferencia(celdas) {
-            var codItem = celdas[0].getAttribute("id");
-            var anio = celdas[18].innerText;
-            $.ajax({
-                url: '/Presupuestoes/CalcularDiferencia',
-                type: 'GET',
-                data: { codItem: codItem, anio: anio },
-                success: function (diferencia) {
-                    celdas[5].innerText = diferencia + "%";
-                },
-                error: function (xhr, status, error) {
-                    console.log("Error al obtener diferencia " + error);
-                    console.log(xhr);
-                }
-            });
-        }
-
-    </script>
-
-   }
+}

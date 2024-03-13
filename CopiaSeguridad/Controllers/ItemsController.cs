@@ -61,6 +61,17 @@ namespace Presentacion.Controllers
 
         }
 
+        public async Task<IActionResult> ListaItems()
+        {
+
+            var items = _context.Items.ToList();
+            var conceptos = _context.Conceptos.ToList();
+            ViewBag.Conceptos = conceptos;
+
+            return View(items);
+
+        }
+
         // GET: Items/Details/5
         public async Task<IActionResult> Details(Int16 id)
         {
@@ -86,7 +97,6 @@ namespace Presentacion.Controllers
             var conceptos = await _context.Conceptos.ToListAsync();
             ViewBag.Conceptos = conceptos;
 
-            //ViewData["CodConcepto"] = new SelectList(_context.Conceptos, "CodConcepto", "CodConcepto");
             return View();
         }
 

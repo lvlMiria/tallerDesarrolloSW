@@ -94,13 +94,35 @@ namespace Presentacion.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([Bind("Anio,Valor")] Ipc ipc)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(ipc);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(ipc);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }catch (DbUpdateException ex)
+            {
+                ViewBag.Mensaje = "El año ya se encuentra en la base de datos.";
+                return View(ipc);
             }
+            ViewBag.Mensaje = "Error al ingresar los datos";
             return View(ipc);
+        }
+
+        [HttpGet]
+        public ActionResult RevisarAnio(short anio)
+        {
+            var ipc = _context.Ipcs.Where(i=>i.Anio == anio).FirstOrDefault();
+            if (ipc != null)
+            {
+                return Json(ipc);
+            }
+            else
+            {
+                return Json(null);
+            }
         }
 
         // GET: Ipcs/Edit/5

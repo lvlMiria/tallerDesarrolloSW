@@ -13,7 +13,7 @@
     </div>
 
     <div class="container-fluid d-flex flex-column justify-content-center">
-        <form asp-action="Create" method="POST">
+        <form id="formCrearFactura" asp-action="Create" method="POST">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="row m-1">
                 @*Item*@
@@ -34,6 +34,7 @@
                 <div class="input-group mb-3">
                     <input asp-for="NumFactura" type="text" class="form-control" aria-label="nFactura">
                 </div>
+                <span asp-validation-for="NumFactura" class="text-danger"></span>
             </div>
 
             @*Monto*@
@@ -43,6 +44,7 @@
                     <span class="input-group-text">$</span>
                     <input asp-for="Monto" type="text" class="form-control" aria-label="txtMonto">
                 </div>
+                <span asp-validation-for="Monto" class="text-danger"></span>
             </div>
 
             <div class="row m-1">
@@ -56,11 +58,19 @@
                         <option value="Three">Three</option>
                     </select>
                 </div>
+                <span asp-validation-for="Empresa" class="text-danger"></span>
             </div>
 
+
+            @*Fecha recepción y entrega*@
+
+            @{
+                var recepcion = ViewBag.Recepcion;
+                recepcion = recepcion.ToString("yyyy-MM-dd");
+            }
             <div class="row m-3">
                 <label for="dtRecepcion">Fecha de Recepción</label>
-                <input name="fechaRecepcion" id="dtRecepcion" class="form-control" type="date" />
+                <input name="fechaRecepcion" value="@recepcion" id="dtRecepcion" class="form-control" type="date" onchange="seleccionarMismaFecha(this.value, 'dtEntrega')" />
             </div>
 
             <div class="row m-3">
@@ -69,20 +79,26 @@
             </div>
 
             @*Mes y año contable*@
+
+            @{
+                var mesContable = ViewBag.Contable.Mes;
+                var anioContable = ViewBag.Contable.Anio;
+            }
+
             <div class="row m-1">
                 <div class="col-6">
                     <label for="txtMes">Mes Contable</label>
                     <div class="input-group mb-3">
-                        <input asp-for="MesContable" type="text" class="form-control" id="txtMes">
+                        <input asp-for="MesContable" value="@mesContable" type="text" class="form-control" id="txtMes">
                     </div>
-                    <span asp-validation-for="CodFactura" class="text-danger"></span>
+                    <span asp-validation-for="MesContable" class="text-danger"></span>
                 </div>
                 <div class="col-6">
                     <label for="txtAnio">Año Contable</label>
                     <div class="input-group mb-3">
-                        <input asp-for="AnioContable" type="text" class="form-control" id="txtAnio">
+                        <input asp-for="AnioContable" value="@anioContable" type="text" class="form-control" id="txtAnio">
                     </div>
-                    <span asp-validation-for="CodFactura" class="text-danger"></span>
+                    <span asp-validation-for="AnioContable" class="text-danger"></span>
                 </div>
             </div>
 
@@ -91,7 +107,6 @@
                 <p>Origen</p>
                 <div class="col-6">
                     <div class="form-check">
-                        @*ARREGLAR VISUAL*@
                         <div class="row">
                             <div class="col-6">
                                 <div>
@@ -154,6 +169,44 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
+        //Filtrar combobox escribiendo
+        document.getElementById("cboEmpresa").addEventListener("input", function () {
+            var input, filter, select, options, option, i, txtValue;
+            input = this.value;
+            select = document.getElementById("cboEmpresa");
+            options = select.getElementsByTagName("option");
+            filter = input.toUpperCase();
+
+            for (i = 0; i < options.length; i++) {
+                option = options[i];
+                txtValue = option.textContent || option.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    option.style.display = "";
+                } else {
+                    option.style.display = "none";
+                }
+            }
+        });
+    </script>
+    <script>
+        //BUSCAR COMO FILTRAR ENTRE LAS 8000+ EMPRESAS
+        $.ajax({
+            url: '/Facturas/ObtenerEmpresas',
+            type: 'GET',
+            success: function (data) {
+                $('#cboEmpresa').empty();
+
+                $.each(data, function (index, option) {
+                    $('#cboEmpresa').append($('<option>', {
+                        value: option.rutEmpresa,
+                        text: option.nomEmpresa
+                    }));
+                });
+            }
+        });
+    </script>
+
+    <script>
         //Si rdbContrato está seleccionado, se desactiva el txtSIT
         function habilitarInput() {
             var rdbContrato = document.getElementById("rdbContrato");
@@ -168,6 +221,38 @@
             }
         }
     </script>
+
+    <script>
+        //Al elegir fecha de recepción, se copia en la recepción
+        function seleccionarMismaFecha(fecha, idInput) {
+            document.getElementById(idInput).value = fecha;
+            document.getElementById(idInput).min = fecha;
+        }
+    </script>
+
+    <script>
+        document.getElementById("formCrearFactura").addEventListener("submit", function (event) {
+            // Detener el envío del formulario para validar si el dólar fue ingresado
+            event.preventDefault();
+
+            var txtAnio = document.getElementById('txtAnio').value;
+            txtAnio = parseInt(txtAnio, 10) & 0xFFFF;
+            var txtMes = document.getElementById('txtMes').value;
+            txtMes = parseInt(txtMes, 10) & 0xFF;
+
+            $.ajax({
+                url: '/Facturas/BuscarDolar',
+                type: 'GET',
+                data: { mes: txtMes, anio: txtAnio },
+                success: function (data) {
+                    if (data != null) {
+                        this.submit();
+                    }
+                },
+            });
+        });
+    </script>
+
     <script>
         document.getElementById("btnGrabar").addEventListener("click", function () {
             var txtSIT = document.getElementById("txtSIT").value;
@@ -180,16 +265,21 @@
             cboItems = parseInt(cboItems, 10) & 0xFFFF;
             var txtAnio = document.getElementById('txtAnio').value;
             txtAnio = parseInt(txtAnio, 10) & 0xFFFF;
+            var txtMes = document.getElementById('txtMes').value;
+            txtMes = parseInt(txtMes, 10) & 0xFF;
 
             $.ajax({
                 url: '/ControlFacturas/Create',
                 type: 'POST',
-                data: { textoSIT: txtSIT, codItem: cboItems, anio: txtAnio, codControl: 1, codPresupuesto: 1, codFactura: 1, origen: rdbOrigen, fechaRecepcion: dtRecepcion, fechaEntrega: dtEntrega, comentario: txtComentario },
-                //SI DEJA DE FUNCIONAR, PUEDE SER PQ COMENTÉ ESTO
-                // success: function (data) {
-                //     console.log("YIPIEEEEEEE");
-
-                // },
+                data: { mes: txtMes, textoSIT: txtSIT, codItem: cboItems, anio: txtAnio, codControl: 1, codPresupuesto: 1, codFactura: 1, origen: rdbOrigen, fechaRecepcion: dtRecepcion, fechaEntrega: dtEntrega, comentario: txtComentario },
+                success: function (data) {
+                    if (data == "No se ha ingresado el valor del dólar de este periodo de tiempo.") {
+                        alert(data);
+                    }
+                },
+                error: function (error) {
+                    alert("Error");
+                }
             });
         });
     </script>
